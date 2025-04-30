@@ -12,15 +12,132 @@ enum Role {
   ADMIN
 }
 
+enum PaymentStatus {
+  PENDING
+  PAID
+  FREE
+  FAILED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
 model User {
-  id         String   @id @default(uuid())
+  id         String  @id @default(uuid())
   full_name  String
-  email      String   @unique
+  email      String  @unique
   password   String
-  role       Role     @default(USER)
-  is_deleted Boolean  @default(false)
+  role       Role    @default(USER)
+  is_deleted Boolean @default(false)
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  events               Event[]       @relation("OrganizerEvents")
+  Participant          Participant[]
+  sent_invitations     Invitation[]  @relation("SentInvitations")
+  received_invitations Invitation[]  @relation("ReceivedInvitations")
+  reviews              Review[]
+  payments             Payment[]
+
   @@map("users")
+}
+
+model Event {
+  id               String   @id @default(uuid())
+  title            String
+  description      String
+  date_time        DateTime
+  venue            String
+  is_public        Boolean
+  is_paid          Boolean
+  registration_fee Decimal  @default(0.00)
+  organizer_id     String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  organizer    User          @relation("OrganizerEvents", fields: [organizer_id], references: [id])
+  participants Participant[]
+  invitations  Invitation[]
+  reviews      Review[]
+  payments     Payment[]
+
+  @@map("events")
+}
+
+model Participant {
+  id              String         @id @default(uuid())
+  event_id        String
+  user_id         String
+  payment_status  PaymentStatus
+  approval_status ApprovalStatus
+  is_banned       Boolean        @default(false)
+  joined_at       DateTime       @default(now())
+
+  event Event @relation(fields: [event_id], references: [id])
+  user  User  @relation(fields: [user_id], references: [id])
+
+  @@unique([event_id, user_id])
+  @@map("participants")
+}
+
+model Invitation {
+  id                String           @id @default(uuid())
+  event_id          String
+  sender_id         String
+  receiver_id       String
+  is_paid_event     Boolean
+  payment_status    PaymentStatus
+  invitation_status InvitationStatus
+
+  created_at DateTime @default(now())
+
+  event    Event @relation(fields: [event_id], references: [id])
+  sender   User  @relation("SentInvitations", fields: [sender_id], references: [id])
+  receiver User  @relation("ReceivedInvitations", fields: [receiver_id], references: [id])
+
+  @@map("invitations")
+}
+
+model Review {
+  id       String  @id @default(uuid())
+  user_id  String
+  event_id String
+  rating   Int
+  comment  String?
+
+  created_at DateTime @default(now())
+
+  user  User  @relation(fields: [user_id], references: [id])
+  event Event @relation(fields: [event_id], references: [id])
+
+  @@unique([user_id, event_id])
+  @@map("reviews")
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  user_id        String
+  event_id       String
+  amount         Decimal
+  status         PaymentStatus
+  method         String
+  transaction_id String
+  gateway_data   Json?
+  paid_at        DateTime      @default(now())
+
+  user  User  @relation(fields: [user_id], references: [id])
+  event Event @relation(fields: [event_id], references: [id])
+
+  @@map("payments")
 }
