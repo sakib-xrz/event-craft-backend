@@ -1,6 +1,10 @@
 import multer from 'multer';
 import path from 'path';
-import { v2 as cloudinary } from 'cloudinary';
+import {
+  v2 as cloudinary,
+  UploadApiResponse,
+  DeleteApiResponse,
+} from 'cloudinary';
 import { Request } from 'express';
 import config from '../config/index';
 
@@ -18,7 +22,6 @@ const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx/;
 const storage = multer.memoryStorage();
 
 // File filter for multer
-
 const fileFilter = (
   _req: Request,
   file: Express.Multer.File,
@@ -32,7 +35,11 @@ const fileFilter = (
   if (extname && mimetype) {
     cb(null, true);
   } else {
-    cb(new Error('Only images, PDFs, and DOC/DOCX files are allowed'));
+    cb(
+      new Error(
+        'Only images (jpeg, jpg, png, gif), PDFs, and DOC/DOCX files are allowed',
+      ),
+    );
   }
 };
 
@@ -47,7 +54,7 @@ const upload = multer({
 const uploadToCloudinary = async (
   file: Express.Multer.File,
   options: { folder?: string; public_id?: string } = {},
-) => {
+): Promise<UploadApiResponse | undefined> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(
@@ -72,7 +79,9 @@ const uploadToCloudinary = async (
 };
 
 // Delete file from Cloudinary
-const deleteFromCloudinary = async (publicIds: string[]) => {
+const deleteFromCloudinary = async (
+  publicIds: string[],
+): Promise<DeleteApiResponse | undefined> => {
   return new Promise((resolve, reject) => {
     cloudinary.api.delete_resources(publicIds, (error, result) => {
       if (error) {

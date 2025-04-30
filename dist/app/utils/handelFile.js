@@ -35,7 +35,7 @@ const fileFilter = (_req, file, cb) => {
         cb(null, true);
     }
     else {
-        cb(new Error('Only images, PDFs, and DOC/DOCX files are allowed'));
+        cb(new Error('Only images (jpeg, jpg, png, gif), PDFs, and DOC/DOCX files are allowed'));
     }
 };
 // Multer instance
