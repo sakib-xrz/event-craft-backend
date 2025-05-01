@@ -3,6 +3,7 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import AuthService from './auth.services';
 
+
 const Login = catchAsync(async (req, res) => {
   const result = await AuthService.Login(req.body);
   const { access_token, refresh_token } = result;
