@@ -7,23 +7,8 @@ import { Role } from '@prisma/client';
 
 const router = express.Router();
 
-router.post(
-  '/login',
-  validateRequest(AuthValidation.LoginSchema),
-  AuthController.Login,
-);
-
-router.post(
-  '/register',
-  validateRequest(AuthValidation.RegisterSchema),
-  AuthController.Register,
-);
-
-router.patch(
-  '/change-password',
-  auth(Role.ADMIN, Role.USER),
-  validateRequest(AuthValidation.ChangePasswordSchema),
-  AuthController.ChangePassword,
-);
+router.post('/login', validateRequest(AuthValidation.LoginSchema), AuthController.Login);
+router.post('/register', validateRequest(AuthValidation.RegisterSchema), AuthController.Register);
+router.patch('/change-password', auth(Role.ADMIN, Role.USER), validateRequest(AuthValidation.ChangePasswordSchema), AuthController.ChangePassword);
 
 export const AuthRoutes = router;

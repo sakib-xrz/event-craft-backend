@@ -10,4 +10,7 @@ export interface IRegister {
   email: string;
   password: string;
   role: TRole;
+  phone: string;
+  address?: string;
+  image_url?: string;
 }
