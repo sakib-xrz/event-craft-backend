@@ -80,9 +80,26 @@ const ChangePassword = (payload, user) => __awaiter(void 0, void 0, void 0, func
         data: { password: hashedPassword },
     });
 });
+const GetMyProfile = (user) => __awaiter(void 0, void 0, void 0, function* () {
+    const userProfile = yield prisma_1.default.user.findUnique({
+        where: { id: user.id, email: user.email },
+        select: {
+            id: true,
+            email: true,
+            full_name: true,
+            role: true,
+            created_at: true,
+        },
+    });
+    if (!userProfile) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'User not found');
+    }
+    return userProfile;
+});
 const AuthService = {
     Login,
     Register,
     ChangePassword,
+    GetMyProfile,
 };
 exports.default = AuthService;

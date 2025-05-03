@@ -26,4 +26,6 @@ router.patch(
   AuthController.ChangePassword,
 );
 
+router.get('/me', auth(Role.ADMIN, Role.USER), AuthController.GetMyProfile);
+
 export const AuthRoutes = router;

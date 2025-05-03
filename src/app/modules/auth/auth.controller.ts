@@ -51,10 +51,22 @@ const ChangePassword = catchAsync(async (req, res) => {
   });
 });
 
+const GetMyProfile = catchAsync(async (req, res) => {
+  const result = await AuthService.GetMyProfile(req.user);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'User profile retrieved successfully',
+    data: result,
+  });
+});
+
 const AuthController = {
   Login,
   Register,
   ChangePassword,
+  GetMyProfile,
 };
 
 export default AuthController;

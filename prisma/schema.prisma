@@ -31,9 +31,15 @@ enum InvitationStatus {
   DECLINED
 }
 
+enum EventStatus {
+  UPCOMING
+  COMPLETED
+  CANCELLED
+}
+
 model User {
   id         String  @id @default(uuid())
-  full_name  String
+  full_name  String?
   email      String  @unique
   password   String
   role       Role    @default(USER)
@@ -42,25 +48,29 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  events               Event[]       @relation("OrganizerEvents")
+  events               Event[]        @relation("OrganizerEvents")
   Participant          Participant[]
-  sent_invitations     Invitation[]  @relation("SentInvitations")
-  received_invitations Invitation[]  @relation("ReceivedInvitations")
+  sent_invitations     Invitation[]   @relation("SentInvitations")
+  received_invitations Invitation[]   @relation("ReceivedInvitations")
   reviews              Review[]
   payments             Payment[]
+  notifications        Notification[]
 
   @@map("users")
 }
 
 model Event {
-  id               String   @id @default(uuid())
+  id               String      @id @default(uuid())
   title            String
   description      String
   date_time        DateTime
-  venue            String
+  venue            String?
   is_public        Boolean
   is_paid          Boolean
-  registration_fee Decimal  @default(0.00)
+  is_virtual       Boolean     @default(false)
+  registration_fee Decimal     @default(0.00)
+  status           EventStatus @default(UPCOMING)
+  is_deleted       Boolean     @default(false)
   organizer_id     String
 
   created_at DateTime @default(now())
@@ -88,6 +98,8 @@ model Participant {
   user  User  @relation(fields: [user_id], references: [id])
 
   @@unique([event_id, user_id])
+  @@index([event_id])
+  @@index([user_id])
   @@map("participants")
 }
 
@@ -99,6 +111,7 @@ model Invitation {
   is_paid_event     Boolean
   payment_status    PaymentStatus
   invitation_status InvitationStatus
+  joined_at         DateTime?
 
   created_at DateTime @default(now())
 
@@ -106,6 +119,9 @@ model Invitation {
   sender   User  @relation("SentInvitations", fields: [sender_id], references: [id])
   receiver User  @relation("ReceivedInvitations", fields: [receiver_id], references: [id])
 
+  @@unique([event_id, receiver_id])
+  @@index([event_id])
+  @@index([receiver_id])
   @@map("invitations")
 }
 
@@ -122,6 +138,8 @@ model Review {
   event Event @relation(fields: [event_id], references: [id])
 
   @@unique([user_id, event_id])
+  @@index([event_id])
+  @@index([user_id])
   @@map("reviews")
 }
 
@@ -139,5 +157,20 @@ model Payment {
   user  User  @relation(fields: [user_id], references: [id])
   event Event @relation(fields: [event_id], references: [id])
 
+  @@index([event_id])
+  @@index([user_id])
   @@map("payments")
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  user_id    String
+  message    String
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@map("notifications")
 }

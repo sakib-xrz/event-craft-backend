@@ -125,10 +125,31 @@ const ChangePassword = async (
   });
 };
 
+const GetMyProfile = async (user: JwtPayload) => {
+  const userProfile = await prisma.user.findUnique({
+    where: { id: user.id, email: user.email },
+
+    select: {
+      id: true,
+      email: true,
+      full_name: true,
+      role: true,
+      created_at: true,
+    },
+  });
+
+  if (!userProfile) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  return userProfile;
+};
+
 const AuthService = {
   Login,
   Register,
   ChangePassword,
+  GetMyProfile,
 };
 
 export default AuthService;
