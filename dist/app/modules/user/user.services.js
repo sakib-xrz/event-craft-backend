@@ -39,6 +39,13 @@ const GetUsers = (params, options) => __awaiter(void 0, void 0, void 0, function
     };
     const data = yield prisma_1.default.user.findMany({
         where: whereConditions,
+        select: {
+            id: true,
+            email: true,
+            full_name: true,
+            role: true,
+            created_at: true,
+        },
         skip,
         take: limit,
         orderBy: options.sort_by && options.sort_order
@@ -64,6 +71,13 @@ const GetUsers = (params, options) => __awaiter(void 0, void 0, void 0, function
 const GetUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield prisma_1.default.user.findUnique({
         where: { id, is_deleted: false },
+        select: {
+            id: true,
+            email: true,
+            full_name: true,
+            role: true,
+            created_at: true,
+        },
     });
     if (!result) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'User not found');

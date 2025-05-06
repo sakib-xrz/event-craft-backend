@@ -41,6 +41,13 @@ const GetUsers = async (
 
   const data = await prisma.user.findMany({
     where: whereConditions,
+    select: {
+      id: true,
+      email: true,
+      full_name: true,
+      role: true,
+      created_at: true,
+    },
     skip,
     take: limit,
     orderBy:
@@ -70,6 +77,13 @@ const GetUsers = async (
 const GetUser = async (id: string) => {
   const result = await prisma.user.findUnique({
     where: { id, is_deleted: false },
+    select: {
+      id: true,
+      email: true,
+      full_name: true,
+      role: true,
+      created_at: true,
+    },
   });
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
