@@ -1,16 +1,17 @@
-const pick = <T extends Record<string, unknown>, K extends keyof T>(
-    object: T,
-    keys: K[]
-  ): Partial<T> => {
-    const result: Partial<T> = {};
-    for (const key of keys) {
-      if (object && Object.prototype.hasOwnProperty.call(object, key)) {
-        result[key] = object[key];
-      }
-    }
-  
-    return result;
-  };
-  
+const pick = <T extends Record<string, unknown>, k extends keyof T>(
+  obj: T,
+  keys: k[],
+): Partial<T> => {
+  const finalObj: Partial<T> = {};
 
-  export default pick
+  for (const key of keys) {
+    if (obj && Object.hasOwnProperty.call(obj, key)) {
+      finalObj[key] = obj[key];
+    }
+  }
+
+  console.log(finalObj);
+  return finalObj;
+};
+
+export default pick;

@@ -1,33 +1,35 @@
-interface PaginationOptions {
-    page?: number;
-    limit?: number;
-    sort?: string;
-    order?: string;
-  }
-  
-  interface PaginationResult {
-    page: number;
-    limit: number;
-    sort: string;
-    order: string;
-    skip: number;
-  }
-  
-  const calculatePagination = (options: PaginationOptions): PaginationResult => {
-    const page = Number(options.page) || 1;
-    const limit = Number(options.limit) || 10;
-    const skip = (page - 1) * limit;
-    const sort = options.sort || 'created_at';
-    const order = options.order || 'desc';
-  
-    return {
-      page,
-      limit,
-      sort,
-      order,
-      skip,
-    };
+export interface IPaginationOptions {
+  page?: number;
+  limit?: number;
+  sort_order?: string;
+  sort_by?: string;
+}
+
+interface IPaginationResult {
+  page: number;
+  limit: number;
+  skip: number;
+  sort_by: string;
+  sort_order: string;
+}
+
+const calculatePagination = (
+  options: IPaginationOptions,
+): IPaginationResult => {
+  const page: number = Number(options.page) || 1;
+  const limit: number = Number(options.limit) || 10;
+  const skip: number = (Number(page) - 1) * limit;
+
+  const sort_by: string = options.sort_by || 'created_at';
+  const sort_order: string = options.sort_order || 'desc';
+
+  return {
+    page,
+    limit,
+    skip,
+    sort_by,
+    sort_order,
   };
-  
-  export default calculatePagination;
-  
+};
+
+export default calculatePagination;
