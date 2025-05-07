@@ -87,6 +87,29 @@ const UpdateStatus = catchAsync(async (req, res) => {
   });
 });
 
+const JoinEvent = catchAsync(async (req, res) => {
+  const eventId = req.params.id;
+  const user = req.user;
+  const result = await EventService.JoinEvent(eventId, user);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Event joined successfully',
+    data: result,
+  });
+});
+
+const GetParticipants = catchAsync(async (req, res) => {
+  const eventId = req.params.id;
+  const result = await EventService.GetParticipants(eventId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Participants retrieved successfully',
+    data: result,
+  });
+});
+
 const EventController = {
   CreateEvent,
   GetEvents,
@@ -94,6 +117,8 @@ const EventController = {
   UpdateEvent,
   DeleteEvent,
   UpdateStatus,
+  JoinEvent,
+  GetParticipants,
 };
 
 export default EventController;

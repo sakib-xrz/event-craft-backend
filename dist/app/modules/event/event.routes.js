@@ -21,4 +21,6 @@ router
 router
     .route('/:id/status')
     .patch((0, auth_1.default)(client_1.Role.USER, client_1.Role.ADMIN), event_controller_1.default.UpdateStatus);
+router.post('/:id/join', (0, auth_1.default)(client_1.Role.USER), event_controller_1.default.JoinEvent);
+router.get('/:id/participants', (0, auth_1.default)(client_1.Role.USER, client_1.Role.ADMIN), event_controller_1.default.GetParticipants);
 exports.EventRoutes = router;

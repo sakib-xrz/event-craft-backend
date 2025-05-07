@@ -20,4 +20,12 @@ router
   .route('/:id/status')
   .patch(auth(Role.USER, Role.ADMIN), EventController.UpdateStatus);
 
+router.post('/:id/join', auth(Role.USER), EventController.JoinEvent);
+
+router.get(
+  '/:id/participants',
+  auth(Role.USER, Role.ADMIN),
+  EventController.GetParticipants,
+);
+
 export const EventRoutes = router;

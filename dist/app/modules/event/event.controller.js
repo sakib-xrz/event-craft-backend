@@ -85,6 +85,27 @@ const UpdateStatus = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
         data: result,
     });
 }));
+const JoinEvent = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const eventId = req.params.id;
+    const user = req.user;
+    const result = yield event_services_1.default.JoinEvent(eventId, user);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Event joined successfully',
+        data: result,
+    });
+}));
+const GetParticipants = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const eventId = req.params.id;
+    const result = yield event_services_1.default.GetParticipants(eventId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Participants retrieved successfully',
+        data: result,
+    });
+}));
 const EventController = {
     CreateEvent,
     GetEvents,
@@ -92,5 +113,7 @@ const EventController = {
     UpdateEvent,
     DeleteEvent,
     UpdateStatus,
+    JoinEvent,
+    GetParticipants,
 };
 exports.default = EventController;

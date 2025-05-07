@@ -1,7 +1,14 @@
 import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
 import prisma from '../../utils/prisma';
-import { Event, EventStatus, Prisma, Role } from '@prisma/client';
+import {
+  ApprovalStatus,
+  Event,
+  EventStatus,
+  PaymentStatus,
+  Prisma,
+  Role,
+} from '@prisma/client';
 import calculatePagination, {
   IPaginationOptions,
 } from '../../utils/pagination';
@@ -241,6 +248,89 @@ const UpdateStatus = async (
   return result;
 };
 
+const JoinEvent = async (eventId: string, user: JwtPayload) => {
+  const event = await prisma.event.findUnique({
+    where: { id: eventId, is_deleted: false },
+  });
+
+  if (!event) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Event not found');
+  }
+
+  const participant = await prisma.participant.findUnique({
+    where: { event_id_user_id: { event_id: eventId, user_id: user.id } },
+  });
+
+  if (participant) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'You are already a participant');
+  }
+
+  if (event.status === EventStatus.COMPLETED) {
+    throw new AppError(httpStatus.FORBIDDEN, 'Event is completed');
+  }
+
+  if (event.status === EventStatus.CANCELLED) {
+    throw new AppError(httpStatus.FORBIDDEN, 'Event is cancelled');
+  }
+
+  let result;
+
+  if (event.is_public && !event.is_paid) {
+    // instant acceptance
+    result = await prisma.participant.create({
+      data: {
+        event_id: eventId,
+        user_id: user.id,
+        payment_status: PaymentStatus.FREE,
+        approval_status: ApprovalStatus.APPROVED,
+      },
+    });
+  } else if (event.is_public && event.is_paid) {
+    // payment flow
+    result = await prisma.participant.create({
+      data: {
+        event_id: eventId,
+        user_id: user.id,
+        payment_status: PaymentStatus.PENDING,
+        approval_status: ApprovalStatus.PENDING,
+      },
+    });
+  } else if (!event.is_public && event.is_paid) {
+    // payment flow
+    result = await prisma.participant.create({
+      data: {
+        event_id: eventId,
+        user_id: user.id,
+        payment_status: PaymentStatus.PENDING,
+        approval_status: ApprovalStatus.PENDING,
+      },
+    });
+  } else if (!event.is_public && !event.is_paid) {
+    // pending approval
+    result = await prisma.participant.create({
+      data: {
+        event_id: eventId,
+        user_id: user.id,
+        payment_status: PaymentStatus.FREE,
+        approval_status: ApprovalStatus.PENDING,
+      },
+    });
+  }
+
+  return result;
+};
+
+const GetParticipants = async (eventId: string) => {
+  const result = await prisma.participant.findMany({
+    where: { event_id: eventId },
+    include: {
+      user: true,
+    },
+  });
+
+  return result;
+};
+
 const EventService = {
   CreateEvent,
   GetEvents,
@@ -248,6 +338,8 @@ const EventService = {
   UpdateEvent,
   DeleteEvent,
   UpdateStatus,
+  JoinEvent,
+  GetParticipants,
 };
 
 export default EventService;

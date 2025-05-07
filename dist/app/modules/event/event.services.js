@@ -168,6 +168,81 @@ const UpdateStatus = (id, status, user) => __awaiter(void 0, void 0, void 0, fun
     }
     return result;
 });
+const JoinEvent = (eventId, user) => __awaiter(void 0, void 0, void 0, function* () {
+    const event = yield prisma_1.default.event.findUnique({
+        where: { id: eventId, is_deleted: false },
+    });
+    if (!event) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Event not found');
+    }
+    const participant = yield prisma_1.default.participant.findUnique({
+        where: { event_id_user_id: { event_id: eventId, user_id: user.id } },
+    });
+    if (participant) {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'You are already a participant');
+    }
+    if (event.status === client_1.EventStatus.COMPLETED) {
+        throw new AppError_1.default(http_status_1.default.FORBIDDEN, 'Event is completed');
+    }
+    if (event.status === client_1.EventStatus.CANCELLED) {
+        throw new AppError_1.default(http_status_1.default.FORBIDDEN, 'Event is cancelled');
+    }
+    let result;
+    if (event.is_public && !event.is_paid) {
+        // instant acceptance
+        result = yield prisma_1.default.participant.create({
+            data: {
+                event_id: eventId,
+                user_id: user.id,
+                payment_status: client_1.PaymentStatus.FREE,
+                approval_status: client_1.ApprovalStatus.APPROVED,
+            },
+        });
+    }
+    else if (event.is_public && event.is_paid) {
+        // payment flow
+        result = yield prisma_1.default.participant.create({
+            data: {
+                event_id: eventId,
+                user_id: user.id,
+                payment_status: client_1.PaymentStatus.PENDING,
+                approval_status: client_1.ApprovalStatus.PENDING,
+            },
+        });
+    }
+    else if (!event.is_public && event.is_paid) {
+        // payment flow
+        result = yield prisma_1.default.participant.create({
+            data: {
+                event_id: eventId,
+                user_id: user.id,
+                payment_status: client_1.PaymentStatus.PENDING,
+                approval_status: client_1.ApprovalStatus.PENDING,
+            },
+        });
+    }
+    else if (!event.is_public && !event.is_paid) {
+        // pending approval
+        result = yield prisma_1.default.participant.create({
+            data: {
+                event_id: eventId,
+                user_id: user.id,
+                payment_status: client_1.PaymentStatus.FREE,
+                approval_status: client_1.ApprovalStatus.PENDING,
+            },
+        });
+    }
+    return result;
+});
+const GetParticipants = (eventId) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.participant.findMany({
+        where: { event_id: eventId },
+        include: {
+            user: true,
+        },
+    });
+    return result;
+});
 const EventService = {
     CreateEvent,
     GetEvents,
@@ -175,5 +250,7 @@ const EventService = {
     UpdateEvent,
     DeleteEvent,
     UpdateStatus,
+    JoinEvent,
+    GetParticipants,
 };
 exports.default = EventService;
