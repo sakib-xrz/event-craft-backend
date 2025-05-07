@@ -109,8 +109,8 @@ model Invitation {
   sender_id         String
   receiver_id       String
   is_paid_event     Boolean
-  payment_status    PaymentStatus
-  invitation_status InvitationStatus
+  invitation_status InvitationStatus @default(PENDING)
+  payment_status    PaymentStatus    @default(PENDING)
   joined_at         DateTime?
 
   created_at DateTime @default(now())
