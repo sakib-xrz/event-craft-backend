@@ -10,9 +10,7 @@ import {
 const SendInvitation = async (
   eventId: string,
   userId: string,
-  payload: {
-    receiver_id: string;
-  },
+  receiver_id: string,
 ) => {
   const event = await prisma.event.findUnique({
     where: { id: eventId },
@@ -26,7 +24,7 @@ const SendInvitation = async (
     data: {
       event_id: eventId,
       sender_id: userId,
-      receiver_id: payload.receiver_id as string,
+      receiver_id: receiver_id,
       is_paid_event: event.is_paid,
     },
   });

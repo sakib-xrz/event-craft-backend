@@ -16,7 +16,7 @@ const http_status_1 = __importDefault(require("http-status"));
 const prisma_1 = __importDefault(require("../../utils/prisma"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const client_1 = require("@prisma/client");
-const SendInvitation = (eventId, userId, payload) => __awaiter(void 0, void 0, void 0, function* () {
+const SendInvitation = (eventId, userId, receiver_id) => __awaiter(void 0, void 0, void 0, function* () {
     const event = yield prisma_1.default.event.findUnique({
         where: { id: eventId },
     });
@@ -27,7 +27,7 @@ const SendInvitation = (eventId, userId, payload) => __awaiter(void 0, void 0, v
         data: {
             event_id: eventId,
             sender_id: userId,
-            receiver_id: payload.receiver_id,
+            receiver_id: receiver_id,
             is_paid_event: event.is_paid,
         },
     });
