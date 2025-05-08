@@ -1,4 +1,5 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
+import NotificationService from '../modules/notification/notification.services';
 
 // Map to store online users - userId -> socketId
 const onlineUsers = new Map<string, string>();
@@ -44,6 +45,13 @@ export const sendInvitationNotification = (
 ) => {
   const receiverSocketId = onlineUsers.get(receiverId);
 
+  NotificationService.CreateNotification({
+    user_id: receiverId,
+    message: data.message,
+    type: data.type,
+    related_event_id: data.eventId,
+  });
+
   if (receiverSocketId) {
     io.to(receiverSocketId).emit('notification', data);
     console.log(`Notification sent to user ${receiverId}`);
@@ -64,6 +72,13 @@ export const sendInvitationStatusNotification = (
   },
 ) => {
   const senderSocketId = onlineUsers.get(senderId);
+
+  NotificationService.CreateNotification({
+    user_id: senderId,
+    message: data.message,
+    type: data.type,
+    related_event_id: data.eventId,
+  });
 
   if (senderSocketId) {
     io.to(senderSocketId).emit('notification', data);
