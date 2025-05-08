@@ -77,11 +77,12 @@ model Event {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  organizer    User          @relation("OrganizerEvents", fields: [organizer_id], references: [id])
-  participants Participant[]
-  invitations  Invitation[]
-  reviews      Review[]
-  payments     Payment[]
+  organizer     User           @relation("OrganizerEvents", fields: [organizer_id], references: [id])
+  participants  Participant[]
+  invitations   Invitation[]
+  reviews       Review[]
+  payments      Payment[]
+  notifications Notification[]
 
   @@map("events")
 }
@@ -164,14 +165,19 @@ model Payment {
 }
 
 model Notification {
-  id         String   @id @default(uuid())
-  user_id    String
-  message    String
-  is_read    Boolean  @default(false)
-  created_at DateTime @default(now())
+  id               String   @id @default(uuid())
+  user_id          String
+  message          String
+  type             String
+  related_event_id String?
+  is_read          Boolean  @default(false)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 
-  user User @relation(fields: [user_id], references: [id])
+  user  User   @relation(fields: [user_id], references: [id])
+  event Event? @relation(fields: [related_event_id], references: [id])
 
   @@index([user_id])
+  @@index([related_event_id])
   @@map("notifications")
 }
