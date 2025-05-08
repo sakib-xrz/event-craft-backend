@@ -9,6 +9,7 @@ const user_routes_1 = require("../modules/user/user.routes");
 const event_routes_1 = require("../modules/event/event.routes");
 const participant_routes_1 = require("../modules/participant/participant.routes");
 const payment_routes_1 = require("../modules/payment/payment.routes");
+const invitation_routes_1 = require("../modules/invitation/invitation.routes");
 const router = express_1.default.Router();
 const routes = [
     {
@@ -30,6 +31,10 @@ const routes = [
     {
         path: '/payments',
         route: payment_routes_1.PaymentRoutes,
+    },
+    {
+        path: '/invitations',
+        route: invitation_routes_1.InvitationRoutes,
     },
 ];
 routes.forEach((route) => {

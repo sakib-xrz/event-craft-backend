@@ -12,11 +12,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.setSocketIO = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const prisma_1 = __importDefault(require("../../utils/prisma"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const client_1 = require("@prisma/client");
 const payment_utils_1 = __importDefault(require("../payment/payment.utils"));
+const socket_1 = require("../../socket");
+// Add a reference to the io instance
+let io = null;
+// Add this function to set the io instance
+const setSocketIO = (socketIO) => {
+    io = socketIO;
+};
+exports.setSocketIO = setSocketIO;
 const SendInvitation = (eventId, userId, receiver_id) => __awaiter(void 0, void 0, void 0, function* () {
     const event = yield prisma_1.default.event.findUnique({
         where: { id: eventId },
@@ -32,6 +41,25 @@ const SendInvitation = (eventId, userId, receiver_id) => __awaiter(void 0, void 
             is_paid_event: event.is_paid,
         },
     });
+    if (io) {
+        // Fetch sender and event details for the notification
+        const sender = yield prisma_1.default.user.findUnique({
+            where: { id: invitation.sender_id },
+        });
+        const event = yield prisma_1.default.event.findUnique({
+            where: { id: invitation.event_id },
+        });
+        if (sender && event) {
+            (0, socket_1.sendInvitationNotification)(io, invitation.receiver_id, {
+                type: 'INVITATION_RECEIVED',
+                message: `${sender.full_name} invited you to ${event.title}`,
+                senderId: invitation.sender_id,
+                senderName: sender.full_name || 'A user',
+                eventId: invitation.event_id,
+                eventTitle: event.title,
+            });
+        }
+    }
     return invitation;
 });
 const GetReceivedInvitations = (userId) => __awaiter(void 0, void 0, void 0, function* () {
@@ -105,6 +133,25 @@ const AcceptInvitation = (invitationId) => __awaiter(void 0, void 0, void 0, fun
                     : client_1.ApprovalStatus.PENDING,
             },
         });
+        if (io) {
+            const invitation = yield prisma_1.default.invitation.findUnique({
+                where: { id: invitationId },
+                include: {
+                    event: true,
+                    receiver: true,
+                },
+            });
+            if (invitation) {
+                (0, socket_1.sendInvitationStatusNotification)(io, invitation.sender_id, {
+                    type: 'INVITATION_ACCEPTED',
+                    message: `${invitation.receiver.full_name} accepted your invitation to ${invitation.event.title}`,
+                    receiverId: invitation.receiver_id,
+                    receiverName: invitation.receiver.full_name || 'A user',
+                    eventId: invitation.event_id,
+                    eventTitle: invitation.event.title,
+                });
+            }
+        }
         return participant;
     }));
 });
@@ -124,6 +171,25 @@ const DeclineInvitation = (invitationId) => __awaiter(void 0, void 0, void 0, fu
             invitation_status: client_1.InvitationStatus.DECLINED,
         },
     });
+    if (io) {
+        const invitation = yield prisma_1.default.invitation.findUnique({
+            where: { id: invitationId },
+            include: {
+                event: true,
+                receiver: true,
+            },
+        });
+        if (invitation) {
+            (0, socket_1.sendInvitationStatusNotification)(io, invitation.sender_id, {
+                type: 'INVITATION_DECLINED',
+                message: `${invitation.receiver.full_name} declined your invitation to ${invitation.event.title}`,
+                receiverId: invitation.receiver_id,
+                receiverName: invitation.receiver.full_name || 'A user',
+                eventId: invitation.event_id,
+                eventTitle: invitation.event.title,
+            });
+        }
+    }
 });
 const InvitationService = {
     SendInvitation,

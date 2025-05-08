@@ -1,3 +1,4 @@
+import { Server as SocketIOServer } from 'socket.io';
 import httpStatus from 'http-status';
 import prisma from '../../utils/prisma';
 import AppError from '../../errors/AppError';
@@ -7,6 +8,19 @@ import {
   ApprovalStatus,
 } from '@prisma/client';
 import PaymentUtils from '../payment/payment.utils';
+
+import {
+  sendInvitationNotification,
+  sendInvitationStatusNotification,
+} from '../../socket';
+
+// Add a reference to the io instance
+let io: SocketIOServer | null = null;
+
+// Add this function to set the io instance
+export const setSocketIO = (socketIO: SocketIOServer) => {
+  io = socketIO;
+};
 
 const SendInvitation = async (
   eventId: string,
@@ -29,6 +43,28 @@ const SendInvitation = async (
       is_paid_event: event.is_paid,
     },
   });
+
+  if (io) {
+    // Fetch sender and event details for the notification
+    const sender = await prisma.user.findUnique({
+      where: { id: invitation.sender_id },
+    });
+
+    const event = await prisma.event.findUnique({
+      where: { id: invitation.event_id },
+    });
+
+    if (sender && event) {
+      sendInvitationNotification(io, invitation.receiver_id, {
+        type: 'INVITATION_RECEIVED',
+        message: `${sender.full_name} invited you to ${event.title}`,
+        senderId: invitation.sender_id,
+        senderName: sender.full_name || 'A user',
+        eventId: invitation.event_id,
+        eventTitle: event.title,
+      });
+    }
+  }
 
   return invitation;
 };
@@ -116,6 +152,27 @@ const AcceptInvitation = async (invitationId: string) => {
       },
     });
 
+    if (io) {
+      const invitation = await prisma.invitation.findUnique({
+        where: { id: invitationId },
+        include: {
+          event: true,
+          receiver: true,
+        },
+      });
+
+      if (invitation) {
+        sendInvitationStatusNotification(io, invitation.sender_id, {
+          type: 'INVITATION_ACCEPTED',
+          message: `${invitation.receiver.full_name} accepted your invitation to ${invitation.event.title}`,
+          receiverId: invitation.receiver_id,
+          receiverName: invitation.receiver.full_name || 'A user',
+          eventId: invitation.event_id,
+          eventTitle: invitation.event.title,
+        });
+      }
+    }
+
     return participant;
   });
 };
@@ -139,6 +196,27 @@ const DeclineInvitation = async (invitationId: string) => {
       invitation_status: InvitationStatus.DECLINED,
     },
   });
+
+  if (io) {
+    const invitation = await prisma.invitation.findUnique({
+      where: { id: invitationId },
+      include: {
+        event: true,
+        receiver: true,
+      },
+    });
+
+    if (invitation) {
+      sendInvitationStatusNotification(io, invitation.sender_id, {
+        type: 'INVITATION_DECLINED',
+        message: `${invitation.receiver.full_name} declined your invitation to ${invitation.event.title}`,
+        receiverId: invitation.receiver_id,
+        receiverName: invitation.receiver.full_name || 'A user',
+        eventId: invitation.event_id,
+        eventTitle: invitation.event.title,
+      });
+    }
+  }
 };
 
 const InvitationService = {
