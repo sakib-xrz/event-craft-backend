@@ -15,7 +15,8 @@
     "format": "prettier . --write",
     "generate": "ts-node ./bin/generate-module.ts",
     "migrate": "npx prisma migrate dev",
-    "studio": "npx prisma studio"
+    "studio": "npx prisma studio",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.11.0",
