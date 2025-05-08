@@ -16,6 +16,7 @@ const http_status_1 = __importDefault(require("http-status"));
 const prisma_1 = __importDefault(require("../../utils/prisma"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const client_1 = require("@prisma/client");
+const payment_utils_1 = __importDefault(require("../payment/payment.utils"));
 const SendInvitation = (eventId, userId, receiver_id) => __awaiter(void 0, void 0, void 0, function* () {
     const event = yield prisma_1.default.event.findUnique({
         where: { id: eventId },
@@ -61,6 +62,7 @@ const AcceptInvitation = (invitationId) => __awaiter(void 0, void 0, void 0, fun
                         id: true,
                         is_paid: true,
                         is_public: true,
+                        registration_fee: true,
                     },
                 },
             },
@@ -74,6 +76,14 @@ const AcceptInvitation = (invitationId) => __awaiter(void 0, void 0, void 0, fun
         if (invitation.is_paid_event &&
             invitation.payment_status !== client_1.PaymentStatus.PAID) {
             // need implement payment gateway
+            yield tx.payment.create({
+                data: {
+                    event_id: invitation.event_id,
+                    user_id: invitation.receiver_id,
+                    amount: invitation.event.registration_fee,
+                    transaction_id: payment_utils_1.default.generateTransactionId(),
+                },
+            });
         }
         // Update invitation status
         yield tx.invitation.update({
