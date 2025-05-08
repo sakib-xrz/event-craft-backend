@@ -17,6 +17,7 @@ enum PaymentStatus {
   PAID
   FREE
   FAILED
+  CANCELLED
 }
 
 enum ApprovalStatus {
@@ -149,13 +150,14 @@ model Payment {
   event_id       String
   amount         Decimal
   status         PaymentStatus @default(PENDING)
-  transaction_id String
+  transaction_id String        @unique
   gateway_data   Json?
   paid_at        DateTime      @default(now())
 
   user  User  @relation(fields: [user_id], references: [id])
   event Event @relation(fields: [event_id], references: [id])
 
+  @@unique([event_id, user_id])
   @@index([event_id])
   @@index([user_id])
   @@map("payments")
