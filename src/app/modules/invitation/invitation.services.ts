@@ -6,6 +6,7 @@ import {
   PaymentStatus,
   ApprovalStatus,
 } from '@prisma/client';
+import PaymentUtils from '../payment/payment.utils';
 
 const SendInvitation = async (
   eventId: string,
@@ -64,6 +65,7 @@ const AcceptInvitation = async (invitationId: string) => {
             id: true,
             is_paid: true,
             is_public: true,
+            registration_fee: true,
           },
         },
       },
@@ -82,6 +84,14 @@ const AcceptInvitation = async (invitationId: string) => {
       invitation.payment_status !== PaymentStatus.PAID
     ) {
       // need implement payment gateway
+      await tx.payment.create({
+        data: {
+          event_id: invitation.event_id,
+          user_id: invitation.receiver_id,
+          amount: invitation.event.registration_fee,
+          transaction_id: PaymentUtils.generateTransactionId(),
+        },
+      });
     }
 
     // Update invitation status

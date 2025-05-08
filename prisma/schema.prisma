@@ -148,8 +148,7 @@ model Payment {
   user_id        String
   event_id       String
   amount         Decimal
-  status         PaymentStatus
-  method         String
+  status         PaymentStatus @default(PENDING)
   transaction_id String
   gateway_data   Json?
   paid_at        DateTime      @default(now())
