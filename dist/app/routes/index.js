@@ -11,6 +11,7 @@ const participant_routes_1 = require("../modules/participant/participant.routes"
 const payment_routes_1 = require("../modules/payment/payment.routes");
 const invitation_routes_1 = require("../modules/invitation/invitation.routes");
 const notification_routes_1 = require("../modules/notification/notification.routes");
+const review_routes_1 = require("../modules/review/review.routes");
 const router = express_1.default.Router();
 const routes = [
     {
@@ -40,6 +41,10 @@ const routes = [
     {
         path: '/notifications',
         route: notification_routes_1.NotificationRoutes,
+    },
+    {
+        path: '/reviews',
+        route: review_routes_1.ReviewRoutes,
     },
 ];
 routes.forEach((route) => {

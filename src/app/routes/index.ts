@@ -6,6 +6,7 @@ import { ParticipantRoutes } from '../modules/participant/participant.routes';
 import { PaymentRoutes } from '../modules/payment/payment.routes';
 import { InvitationRoutes } from '../modules/invitation/invitation.routes';
 import { NotificationRoutes } from '../modules/notification/notification.routes';
+import { ReviewRoutes } from '../modules/review/review.routes';
 
 const router = express.Router();
 
@@ -42,6 +43,10 @@ const routes: Route[] = [
   {
     path: '/notifications',
     route: NotificationRoutes,
+  },
+  {
+    path: '/reviews',
+    route: ReviewRoutes,
   },
 ];
 

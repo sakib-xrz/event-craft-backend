@@ -28,4 +28,9 @@ router.get(
   EventController.GetParticipants,
 );
 
+router
+  .route('/:id/reviews')
+  .get(auth(Role.USER), EventController.GetReviews)
+  .post(auth(Role.USER), EventController.SubmitReview);
+
 export const EventRoutes = router;

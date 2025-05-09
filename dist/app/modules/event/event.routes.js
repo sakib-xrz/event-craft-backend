@@ -23,4 +23,8 @@ router
     .patch((0, auth_1.default)(client_1.Role.USER, client_1.Role.ADMIN), event_controller_1.default.UpdateStatus);
 router.post('/:id/join', (0, auth_1.default)(client_1.Role.USER), event_controller_1.default.JoinEvent);
 router.get('/:id/participants', (0, auth_1.default)(client_1.Role.USER, client_1.Role.ADMIN), event_controller_1.default.GetParticipants);
+router
+    .route('/:id/reviews')
+    .get((0, auth_1.default)(client_1.Role.USER), event_controller_1.default.GetReviews)
+    .post((0, auth_1.default)(client_1.Role.USER), event_controller_1.default.SubmitReview);
 exports.EventRoutes = router;

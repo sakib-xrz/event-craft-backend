@@ -106,6 +106,28 @@ const GetParticipants = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
         data: result,
     });
 }));
+const SubmitReview = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const eventId = req.params.id;
+    const reviewData = req.body;
+    const user = req.user;
+    const result = yield event_services_1.default.SubmitReview(eventId, reviewData, user);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.CREATED,
+        success: true,
+        message: 'Review submitted successfully',
+        data: result,
+    });
+}));
+const GetReviews = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const eventId = req.params.id;
+    const result = yield event_services_1.default.GetReviews(eventId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Reviews retrieved successfully',
+        data: result,
+    });
+}));
 const EventController = {
     CreateEvent,
     GetEvents,
@@ -115,5 +137,7 @@ const EventController = {
     UpdateStatus,
     JoinEvent,
     GetParticipants,
+    SubmitReview,
+    GetReviews,
 };
 exports.default = EventController;

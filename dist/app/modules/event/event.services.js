@@ -262,6 +262,76 @@ const GetParticipants = (eventId) => __awaiter(void 0, void 0, void 0, function*
     });
     return result;
 });
+const SubmitReview = (eventId, payload, user) => __awaiter(void 0, void 0, void 0, function* () {
+    // Check if event exists and is completed
+    const event = yield prisma_1.default.event.findUnique({
+        where: { id: eventId, is_deleted: false },
+    });
+    if (!event) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Event not found');
+    }
+    if (event.status !== client_1.EventStatus.COMPLETED) {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'You can only review completed events');
+    }
+    // Check if user participated in the event
+    const participant = yield prisma_1.default.participant.findUnique({
+        where: {
+            event_id_user_id: {
+                event_id: eventId,
+                user_id: user.id,
+            },
+        },
+    });
+    if (!participant) {
+        throw new AppError_1.default(http_status_1.default.FORBIDDEN, 'You must be a participant to review this event');
+    }
+    // Check if user already reviewed this event
+    const existingReview = yield prisma_1.default.review.findUnique({
+        where: {
+            user_id_event_id: {
+                user_id: user.id,
+                event_id: eventId,
+            },
+        },
+    });
+    if (existingReview) {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'You have already reviewed this event');
+    }
+    // Create review
+    const result = yield prisma_1.default.review.create({
+        data: {
+            user_id: user.id,
+            event_id: eventId,
+            rating: payload.rating,
+            comment: payload.comment,
+        },
+    });
+    return result;
+});
+const GetReviews = (eventId) => __awaiter(void 0, void 0, void 0, function* () {
+    // Check if event exists
+    const event = yield prisma_1.default.event.findUnique({
+        where: { id: eventId, is_deleted: false },
+    });
+    if (!event) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Event not found');
+    }
+    // Get all reviews for the event
+    const reviews = yield prisma_1.default.review.findMany({
+        where: { event_id: eventId },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    full_name: true,
+                    email: true,
+                },
+            },
+        },
+        orderBy: { created_at: 'desc' },
+    });
+    return reviews;
+});
 const EventService = {
     CreateEvent,
     GetEvents,
@@ -271,5 +341,7 @@ const EventService = {
     UpdateStatus,
     JoinEvent,
     GetParticipants,
+    SubmitReview,
+    GetReviews,
 };
 exports.default = EventService;

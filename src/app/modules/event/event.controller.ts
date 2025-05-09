@@ -110,6 +110,34 @@ const GetParticipants = catchAsync(async (req, res) => {
   });
 });
 
+const SubmitReview = catchAsync(async (req, res) => {
+  const eventId = req.params.id;
+  const reviewData = req.body;
+  const user = req.user;
+
+  const result = await EventService.SubmitReview(eventId, reviewData, user);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: 'Review submitted successfully',
+    data: result,
+  });
+});
+
+const GetReviews = catchAsync(async (req, res) => {
+  const eventId = req.params.id;
+
+  const result = await EventService.GetReviews(eventId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Reviews retrieved successfully',
+    data: result,
+  });
+});
+
 const EventController = {
   CreateEvent,
   GetEvents,
@@ -119,6 +147,8 @@ const EventController = {
   UpdateStatus,
   JoinEvent,
   GetParticipants,
+  SubmitReview,
+  GetReviews,
 };
 
 export default EventController;
