@@ -12,6 +12,7 @@ const payment_routes_1 = require("../modules/payment/payment.routes");
 const invitation_routes_1 = require("../modules/invitation/invitation.routes");
 const notification_routes_1 = require("../modules/notification/notification.routes");
 const review_routes_1 = require("../modules/review/review.routes");
+const admin_routes_1 = require("../modules/admin/admin.routes");
 const router = express_1.default.Router();
 const routes = [
     {
@@ -45,6 +46,10 @@ const routes = [
     {
         path: '/reviews',
         route: review_routes_1.ReviewRoutes,
+    },
+    {
+        path: '/admin',
+        route: admin_routes_1.AdminRoutes,
     },
 ];
 routes.forEach((route) => {
