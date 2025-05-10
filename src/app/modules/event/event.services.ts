@@ -34,12 +34,16 @@ const CreateEvent = async (payload: Event, user: JwtPayload) => {
 };
 
 const CreateEvents = async (payload: Event[], user: JwtPayload) => {
-  const result = await prisma.event.createMany({
-    data: payload.map((event) => ({
+  const payloads = payload.map((event) => {
+    return {
       ...event,
       date_time: new Date(event.date_time),
       organizer_id: user.id,
-    })),
+    };
+  });
+
+  const result = await prisma.event.createMany({
+    data: payloads,
   });
 
   return result;

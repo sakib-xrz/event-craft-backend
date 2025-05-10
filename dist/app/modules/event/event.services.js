@@ -37,8 +37,11 @@ const CreateEvent = (payload, user) => __awaiter(void 0, void 0, void 0, functio
     return result;
 });
 const CreateEvents = (payload, user) => __awaiter(void 0, void 0, void 0, function* () {
+    const payloads = payload.map((event) => {
+        return Object.assign(Object.assign({}, event), { date_time: new Date(event.date_time), organizer_id: user.id });
+    });
     const result = yield prisma_1.default.event.createMany({
-        data: payload.map((event) => (Object.assign(Object.assign({}, event), { date_time: new Date(event.date_time), organizer_id: user.id }))),
+        data: payloads,
     });
     return result;
 });
@@ -123,6 +126,35 @@ const GetEvent = (id) => __awaiter(void 0, void 0, void 0, function* () {
     });
     if (!result) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Event not found');
+    }
+    return result;
+});
+const GetFeaturedEvent = () => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.event.findFirst({
+        where: {
+            is_featured: true,
+            is_deleted: false,
+        },
+        select: {
+            id: true,
+            title: true,
+            description: true,
+            date_time: true,
+            venue: true,
+            is_public: true,
+            is_paid: true,
+            is_virtual: true,
+            registration_fee: true,
+            status: true,
+            organizer: {
+                select: {
+                    full_name: true,
+                },
+            },
+        },
+    });
+    if (!result) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Featured event not found');
     }
     return result;
 });
@@ -385,6 +417,7 @@ const EventService = {
     CreateEvents,
     GetEvents,
     GetEvent,
+    GetFeaturedEvent,
     UpdateEvent,
     DeleteEvent,
     UpdateStatus,

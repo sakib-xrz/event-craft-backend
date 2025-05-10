@@ -14,6 +14,7 @@ router
     .post((0, auth_1.default)(client_1.Role.USER, client_1.Role.ADMIN), event_controller_1.default.CreateEvent)
     .get(event_controller_1.default.GetEvents);
 router.post('/bulk', (0, auth_1.default)(client_1.Role.USER, client_1.Role.ADMIN), event_controller_1.default.CreateEvents);
+router.route('/featured').get(event_controller_1.default.GetFeaturedEvent);
 router
     .route('/:id')
     .get(event_controller_1.default.GetEvent)
