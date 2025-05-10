@@ -7,7 +7,7 @@ const FilterableFields = [
   'status',
 ];
 
-const SearchableFields = ['title', 'description', 'organizer.full_name'];
+const SearchableFields = ['title'];
 
 const EventConstants = {
   FilterableFields,
