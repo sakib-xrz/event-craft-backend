@@ -18,7 +18,11 @@ async function startServer() {
   // Initialize Socket.IO with CORS
   io = new SocketIOServer(server, {
     cors: {
-      origin: ['http://localhost:3000'],
+      origin: [
+        'http://localhost:3000',
+        'https://eventcraft-frontend.vercel.app',
+        'https://eventcraft-mocha.vercel.app',
+      ],
       methods: ['GET', 'POST'],
       credentials: true,
     },
