@@ -142,6 +142,51 @@ const GetEvents = async (
 const GetEvent = async (id: string) => {
   const result = await prisma.event.findUnique({
     where: { id, is_deleted: false },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      date_time: true,
+      venue: true,
+      is_featured: true,
+      is_public: true,
+      is_paid: true,
+      is_virtual: true,
+      registration_fee: true,
+      status: true,
+      organizer: {
+        select: {
+          full_name: true,
+          email: true,
+        },
+      },
+      participants: {
+        select: {
+          user: {
+            select: {
+              id: true,
+              full_name: true,
+              email: true,
+            },
+          },
+        },
+      },
+      reviews: {
+        select: {
+          user: {
+            select: {
+              id: true,
+              full_name: true,
+              email: true,
+            },
+          },
+          rating: true,
+          comment: true,
+          created_at: true,
+        },
+        orderBy: { created_at: 'desc' },
+      },
+    },
   });
 
   if (!result) {
