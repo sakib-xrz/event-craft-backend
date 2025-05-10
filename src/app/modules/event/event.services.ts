@@ -50,7 +50,7 @@ const GetEvents = async (
   options: IPaginationOptions,
 ) => {
   const { page, limit, skip } = calculatePagination(options);
-  const { search } = filters;
+  const { search, ...restFilters } = filters;
 
   const andConditions: Prisma.EventWhereInput[] = [];
 
@@ -65,6 +65,22 @@ const GetEvents = async (
     });
   }
 
+  if (Object.keys(restFilters).length > 0) {
+    andConditions.push({
+      AND: Object.keys(restFilters).map((key) => {
+        const value = (restFilters as Record<string, string>)[key];
+        const processedValue =
+          value === 'true' ? true : value === 'false' ? false : value;
+
+        return {
+          [key]: {
+            equals: processedValue,
+          },
+        };
+      }),
+    });
+  }
+
   andConditions.push({
     is_deleted: false,
   });
@@ -75,6 +91,24 @@ const GetEvents = async (
 
   const data = await prisma.event.findMany({
     where: whereConditions,
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      date_time: true,
+      venue: true,
+      is_featured: true,
+      is_public: true,
+      is_paid: true,
+      is_virtual: true,
+      registration_fee: true,
+      status: true,
+      organizer: {
+        select: {
+          full_name: true,
+        },
+      },
+    },
     skip,
     take: limit,
     orderBy:
