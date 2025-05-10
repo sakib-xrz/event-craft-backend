@@ -1,4 +1,3 @@
-import { Role } from '@prisma/client';
 import { z } from 'zod';
 
 const LoginSchema = z.object({
@@ -37,10 +36,6 @@ const RegisterSchema = z.object({
         invalid_type_error: 'Password must be a string',
       })
       .min(6, 'Password must be at least 6 characters'),
-    role: z.enum([Role.ADMIN, Role.USER], {
-      invalid_type_error: 'Role must be either ADMIN or USER',
-      message: 'Role is required and must be either ADMIN or USER',
-    }),
   }),
 });
 

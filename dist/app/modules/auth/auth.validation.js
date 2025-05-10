@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const client_1 = require("@prisma/client");
 const zod_1 = require("zod");
 const LoginSchema = zod_1.z.object({
     body: zod_1.z.object({
@@ -37,10 +36,6 @@ const RegisterSchema = zod_1.z.object({
             invalid_type_error: 'Password must be a string',
         })
             .min(6, 'Password must be at least 6 characters'),
-        role: zod_1.z.enum([client_1.Role.ADMIN, client_1.Role.USER], {
-            invalid_type_error: 'Role must be either ADMIN or USER',
-            message: 'Role is required and must be either ADMIN or USER',
-        }),
     }),
 });
 const ChangePasswordSchema = zod_1.z.object({
