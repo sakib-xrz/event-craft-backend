@@ -147,6 +147,38 @@ const GetEvent = async (id: string) => {
   return result;
 };
 
+const GetFeaturedEvent = async () => {
+  const result = await prisma.event.findFirst({
+    where: {
+      is_featured: true,
+      is_deleted: false,
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      date_time: true,
+      venue: true,
+      is_public: true,
+      is_paid: true,
+      is_virtual: true,
+      registration_fee: true,
+      status: true,
+      organizer: {
+        select: {
+          full_name: true,
+        },
+      },
+    },
+  });
+
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Featured event not found');
+  }
+
+  return result;
+};
+
 const UpdateEvent = async (id: string, payload: Event, user: JwtPayload) => {
   let hasPermission = false;
 
@@ -501,6 +533,7 @@ const EventService = {
   CreateEvents,
   GetEvents,
   GetEvent,
+  GetFeaturedEvent,
   UpdateEvent,
   DeleteEvent,
   UpdateStatus,

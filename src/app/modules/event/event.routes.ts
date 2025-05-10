@@ -12,6 +12,8 @@ router
 
 router.post('/bulk', auth(Role.USER, Role.ADMIN), EventController.CreateEvents);
 
+router.route('/featured').get(EventController.GetFeaturedEvent);
+
 router
   .route('/:id')
   .get(EventController.GetEvent)

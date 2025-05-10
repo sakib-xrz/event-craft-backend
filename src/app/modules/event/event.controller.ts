@@ -58,6 +58,17 @@ const GetEvent = catchAsync(async (req, res) => {
   });
 });
 
+const GetFeaturedEvent = catchAsync(async (req, res) => {
+  const result = await EventService.GetFeaturedEvent();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Featured event retrieved successfully',
+    data: result,
+  });
+});
+
 const UpdateEvent = catchAsync(async (req, res) => {
   const eventId = req.params.id;
   const eventData = req.body;
@@ -155,6 +166,7 @@ const EventController = {
   CreateEvents,
   GetEvents,
   GetEvent,
+  GetFeaturedEvent,
   UpdateEvent,
   DeleteEvent,
   UpdateStatus,
