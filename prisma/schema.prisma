@@ -66,6 +66,7 @@ model Event {
   description      String
   date_time        DateTime
   venue            String?
+  is_featured      Boolean     @default(false)
   is_public        Boolean
   is_paid          Boolean
   is_virtual       Boolean     @default(false)

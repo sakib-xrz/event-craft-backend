@@ -33,6 +33,18 @@ const CreateEvent = async (payload: Event, user: JwtPayload) => {
   return result;
 };
 
+const CreateEvents = async (payload: Event[], user: JwtPayload) => {
+  const result = await prisma.event.createMany({
+    data: payload.map((event) => ({
+      ...event,
+      date_time: new Date(event.date_time),
+      organizer_id: user.id,
+    })),
+  });
+
+  return result;
+};
+
 const GetEvents = async (
   filters: IGetEventsParams,
   options: IPaginationOptions,
@@ -452,6 +464,7 @@ const GetReviews = async (eventId: string) => {
 
 const EventService = {
   CreateEvent,
+  CreateEvents,
   GetEvents,
   GetEvent,
   UpdateEvent,

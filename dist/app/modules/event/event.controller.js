@@ -29,6 +29,17 @@ const CreateEvent = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
         data: result,
     });
 }));
+const CreateEvents = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const eventsData = req.body;
+    const user = req.user;
+    const result = yield event_services_1.default.CreateEvents(eventsData, user);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.CREATED,
+        success: true,
+        message: 'Events created successfully',
+        data: result,
+    });
+}));
 const GetEvents = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const filters = (0, pick_1.default)(req.query, event_constant_1.default.FilterableFields);
     const options = (0, pick_1.default)(req.query, ['limit', 'page', 'sort_by', 'sort_order']);
@@ -130,6 +141,7 @@ const GetReviews = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
 }));
 const EventController = {
     CreateEvent,
+    CreateEvents,
     GetEvents,
     GetEvent,
     UpdateEvent,

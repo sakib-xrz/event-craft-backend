@@ -10,6 +10,8 @@ router
   .post(auth(Role.USER, Role.ADMIN), EventController.CreateEvent)
   .get(EventController.GetEvents);
 
+router.post('/bulk', auth(Role.USER, Role.ADMIN), EventController.CreateEvents);
+
 router
   .route('/:id')
   .get(EventController.GetEvent)

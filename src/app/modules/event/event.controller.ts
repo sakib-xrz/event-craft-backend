@@ -18,6 +18,18 @@ const CreateEvent = catchAsync(async (req, res) => {
   });
 });
 
+const CreateEvents = catchAsync(async (req, res) => {
+  const eventsData = req.body;
+  const user = req.user;
+  const result = await EventService.CreateEvents(eventsData, user);
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: 'Events created successfully',
+    data: result,
+  });
+});
+
 const GetEvents = catchAsync(async (req, res) => {
   const filters = pick(req.query, EventConstants.FilterableFields);
 
@@ -140,6 +152,7 @@ const GetReviews = catchAsync(async (req, res) => {
 
 const EventController = {
   CreateEvent,
+  CreateEvents,
   GetEvents,
   GetEvent,
   UpdateEvent,

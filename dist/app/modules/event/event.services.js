@@ -25,6 +25,12 @@ const CreateEvent = (payload, user) => __awaiter(void 0, void 0, void 0, functio
     });
     return result;
 });
+const CreateEvents = (payload, user) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.event.createMany({
+        data: payload.map((event) => (Object.assign(Object.assign({}, event), { date_time: new Date(event.date_time), organizer_id: user.id }))),
+    });
+    return result;
+});
 const GetEvents = (filters, options) => __awaiter(void 0, void 0, void 0, function* () {
     const { page, limit, skip } = (0, pagination_1.default)(options);
     const { search } = filters;
@@ -334,6 +340,7 @@ const GetReviews = (eventId) => __awaiter(void 0, void 0, void 0, function* () {
 });
 const EventService = {
     CreateEvent,
+    CreateEvents,
     GetEvents,
     GetEvent,
     UpdateEvent,
