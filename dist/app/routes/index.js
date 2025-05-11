@@ -32,7 +32,7 @@ const routes = [
         route: participant_routes_1.ParticipantRoutes,
     },
     {
-        path: '/payments',
+        path: '/payment',
         route: payment_routes_1.PaymentRoutes,
     },
     {

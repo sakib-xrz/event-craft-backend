@@ -409,6 +409,8 @@ const JoinEvent = async (eventId: string, user: JwtPayload) => {
     let result;
 
     if (event.is_public && !event.is_paid) {
+      console.log('Public event with no payment');
+
       // instant acceptance
       result = await tx.participant.create({
         data: {

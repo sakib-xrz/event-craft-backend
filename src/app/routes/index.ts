@@ -34,7 +34,7 @@ const routes: Route[] = [
     route: ParticipantRoutes,
   },
   {
-    path: '/payments',
+    path: '/payment',
     route: PaymentRoutes,
   },
   {

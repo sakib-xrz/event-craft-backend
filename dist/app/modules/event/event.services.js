@@ -316,6 +316,7 @@ const JoinEvent = (eventId, user) => __awaiter(void 0, void 0, void 0, function*
         }
         let result;
         if (event.is_public && !event.is_paid) {
+            console.log('Public event with no payment');
             // instant acceptance
             result = yield tx.participant.create({
                 data: {

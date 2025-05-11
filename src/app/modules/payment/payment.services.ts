@@ -50,41 +50,52 @@ const CreatePaymentIntent = async (participantId: string) => {
     throw new Error('Payment already paid');
   }
 
+  // Convert amount to string and ensure all values are strings
   const data = {
-    total_amount: payment.amount,
+    total_amount: String(payment.amount),
     currency: 'BDT',
-    tran_id: payment.transaction_id,
+    tran_id: String(payment.transaction_id),
     success_url: `${config.backend_base_url}/payment/ipn_listener`,
     fail_url: `${config.backend_base_url}/payment/ipn_listener`,
     cancel_url: `${config.backend_base_url}/payment/ipn_listener`,
     ipn_url: `${config.backend_base_url}/payment/ipn_listener`,
-    shipping_method: 'N/A',
-    product_name: participant.event.title,
-    product_category: 'N/A',
-    product_profile: 'N/A',
-    cus_name: participant.user.full_name,
-    cus_email: participant.user.email,
-    cus_add1: 'N/A',
-    cus_add2: 'N/A',
-    cus_city: 'N/A',
-    cus_state: 'N/A',
-    cus_postcode: 'N/A',
+    shipping_method: 'No',
+    product_name: String(participant.event.title),
+    product_category: 'Event',
+    product_profile: 'general',
+    cus_name: String(participant.user.full_name),
+    cus_email: String(participant.user.email),
+    cus_add1: 'Customer Address',
+    cus_add2: 'Customer Address 2',
+    cus_city: 'City',
+    cus_state: 'State',
+    cus_postcode: '1000',
     cus_country: 'Bangladesh',
-    cus_phone: 'N/A',
-    cus_fax: 'N/A',
-    ship_name: participant.user.full_name,
-    ship_add1: 'N/A',
-    ship_add2: 'N/A',
-    ship_city: 'N/A',
-    ship_state: 'N/A',
-    ship_postcode: 'N/A',
+    cus_phone: '01700000000',
+    cus_fax: '01700000000',
+    ship_name: String(participant.user.full_name),
+    ship_add1: 'Ship Address',
+    ship_add2: 'Ship Address 2',
+    ship_city: 'City',
+    ship_state: 'State',
+    ship_postcode: '1000',
     ship_country: 'Bangladesh',
   };
 
-  const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
-  const sslResponse = await sslcz.init(data);
+  try {
+    const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+    const sslResponse = await sslcz.init(data);
 
-  return sslResponse.GatewayPageURL;
+    console.log('SSL Response:', sslResponse);
+
+    return sslResponse.GatewayPageURL;
+  } catch (error) {
+    console.error('SSL Payment Error:', error);
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      'Payment initialization failed',
+    );
+  }
 };
 
 // @ts-expect-error SSLCommerzPayment is not typed
