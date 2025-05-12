@@ -104,6 +104,13 @@ const VerifyPayment = async (payload) => {
     where: {
       transaction_id: payload.tran_id,
     },
+    include: {
+      event: {
+        select: {
+          is_public: true,
+        },
+      },
+    },
   });
 
   if (!payment) {
@@ -169,6 +176,7 @@ const VerifyPayment = async (payload) => {
     },
     data: {
       status: PaymentStatus.PAID,
+      paid_at: new Date(),
     },
   });
 
@@ -192,7 +200,11 @@ const VerifyPayment = async (payload) => {
     });
   }
 
-  return `${config.frontend_base_url}/${config.payment.success_url}`;
+  if (payment.event.is_public) {
+    return `${config.frontend_base_url}/${config.payment.success_url}?tran_id=${payment.transaction_id}`;
+  } else {
+    return `${config.frontend_base_url}/${config.payment.success_pending_approval_url}?tran_id=${payment.transaction_id}`;
+  }
 };
 
 const PaymentService = {

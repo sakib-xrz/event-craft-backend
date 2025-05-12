@@ -31,6 +31,8 @@ export default {
 
   payment: {
     success_url: process.env.PAYMENT_SUCCESS_URL,
+    success_pending_approval_url:
+      process.env.PAYMENT_SUCCESS_PENDING_APPROVAL_URL,
     fail_url: process.env.PAYMENT_FAIL_URL,
     cancel_url: process.env.PAYMENT_CANCEL_URL,
   },

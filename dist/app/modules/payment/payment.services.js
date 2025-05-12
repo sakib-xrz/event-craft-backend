@@ -105,6 +105,13 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
         where: {
             transaction_id: payload.tran_id,
         },
+        include: {
+            event: {
+                select: {
+                    is_public: true,
+                },
+            },
+        },
     });
     if (!payment) {
         throw new Error('Payment not found');
@@ -158,6 +165,7 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
         },
         data: {
             status: client_1.PaymentStatus.PAID,
+            paid_at: new Date(),
         },
     });
     const invitation = yield prisma_1.default.invitation.findUnique({
@@ -178,7 +186,12 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
             },
         });
     }
-    return `${config_1.default.frontend_base_url}/${config_1.default.payment.success_url}`;
+    if (payment.event.is_public) {
+        return `${config_1.default.frontend_base_url}/${config_1.default.payment.success_url}?tran_id=${payment.transaction_id}`;
+    }
+    else {
+        return `${config_1.default.frontend_base_url}/${config_1.default.payment.success_pending_approval_url}?tran_id=${payment.transaction_id}`;
+    }
 });
 const PaymentService = {
     CreatePaymentIntent,
