@@ -108,13 +108,33 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
         include: {
             event: {
                 select: {
+                    id: true,
                     is_public: true,
+                },
+            },
+            user: {
+                select: {
+                    id: true,
                 },
             },
         },
     });
     if (!payment) {
         throw new Error('Payment not found');
+    }
+    const participant = yield prisma_1.default.participant.findUnique({
+        where: {
+            event_id_user_id: {
+                event_id: payment.event_id,
+                user_id: payment.user_id,
+            },
+        },
+        select: {
+            id: true,
+        },
+    });
+    if (!participant) {
+        throw new Error('Participant not found');
     }
     if (payment.status === client_1.PaymentStatus.PAID) {
         throw new Error('Payment already paid');
@@ -129,7 +149,7 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
                     status: client_1.PaymentStatus.FAILED,
                 },
             });
-            return `${config_1.default.frontend_base_url}/${config_1.default.payment.fail_url}`;
+            return `${config_1.default.frontend_base_url}/${config_1.default.payment.fail_url}?participant_id=${participant.id}`;
         }
         if (payload.status === 'CANCELLED') {
             yield prisma_1.default.payment.update({
@@ -140,7 +160,7 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
                     status: client_1.PaymentStatus.CANCELLED,
                 },
             });
-            return `${config_1.default.frontend_base_url}/${config_1.default.payment.cancel_url}`;
+            return `${config_1.default.frontend_base_url}/${config_1.default.payment.cancel_url}?participant_id=${participant.id}`;
         }
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Invalid IPN request');
     }
