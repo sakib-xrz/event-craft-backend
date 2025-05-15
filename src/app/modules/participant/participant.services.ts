@@ -7,6 +7,19 @@ import { JwtPayload } from 'jsonwebtoken';
 const ApproveParticipant = async (participantId: string, user: JwtPayload) => {
   const participant = await prisma.participant.findUnique({
     where: { id: participantId },
+    include: {
+      event: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+        },
+      },
+    },
   });
 
   if (!participant) {
@@ -24,11 +37,26 @@ const ApproveParticipant = async (participantId: string, user: JwtPayload) => {
     );
   }
 
-  const result = await prisma.participant.update({
-    where: { id: participantId },
-    data: {
-      approval_status: ApprovalStatus.APPROVED,
-    },
+  const result = await prisma.$transaction(async (tx) => {
+    // Update participant status
+    const updatedParticipant = await tx.participant.update({
+      where: { id: participantId },
+      data: {
+        approval_status: ApprovalStatus.APPROVED,
+      },
+    });
+
+    // Create notification
+    await tx.notification.create({
+      data: {
+        user_id: participant.user.id,
+        message: `Your participation in '${participant.event.title}' has been approved`,
+        type: 'PARTICIPANT_APPROVED',
+        related_event_id: participant.event.id,
+      },
+    });
+
+    return updatedParticipant;
   });
 
   if (!result) {
@@ -41,6 +69,19 @@ const ApproveParticipant = async (participantId: string, user: JwtPayload) => {
 const RejectParticipant = async (participantId: string, user: JwtPayload) => {
   const participant = await prisma.participant.findUnique({
     where: { id: participantId },
+    include: {
+      event: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+        },
+      },
+    },
   });
 
   if (!participant) {
@@ -54,9 +95,24 @@ const RejectParticipant = async (participantId: string, user: JwtPayload) => {
     );
   }
 
-  const result = await prisma.participant.update({
-    where: { id: participantId },
-    data: { approval_status: ApprovalStatus.REJECTED },
+  const result = await prisma.$transaction(async (tx) => {
+    // Update participant status
+    const updatedParticipant = await tx.participant.update({
+      where: { id: participantId },
+      data: { approval_status: ApprovalStatus.REJECTED },
+    });
+
+    // Create notification
+    await tx.notification.create({
+      data: {
+        user_id: participant.user.id,
+        message: `Your participation in '${participant.event.title}' has been rejected`,
+        type: 'PARTICIPANT_REJECTED',
+        related_event_id: participant.event.id,
+      },
+    });
+
+    return updatedParticipant;
   });
 
   if (!result) {

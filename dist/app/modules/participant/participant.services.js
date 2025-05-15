@@ -19,6 +19,19 @@ const http_status_1 = __importDefault(require("http-status"));
 const ApproveParticipant = (participantId, user) => __awaiter(void 0, void 0, void 0, function* () {
     const participant = yield prisma_1.default.participant.findUnique({
         where: { id: participantId },
+        include: {
+            event: {
+                select: {
+                    id: true,
+                    title: true,
+                },
+            },
+            user: {
+                select: {
+                    id: true,
+                },
+            },
+        },
     });
     if (!participant) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Participant not found');
@@ -29,12 +42,25 @@ const ApproveParticipant = (participantId, user) => __awaiter(void 0, void 0, vo
     if (user.role !== client_1.Role.ADMIN && participant.user_id !== user.id) {
         throw new AppError_1.default(http_status_1.default.FORBIDDEN, 'You are not allowed to approve this participant');
     }
-    const result = yield prisma_1.default.participant.update({
-        where: { id: participantId },
-        data: {
-            approval_status: client_1.ApprovalStatus.APPROVED,
-        },
-    });
+    const result = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        // Update participant status
+        const updatedParticipant = yield tx.participant.update({
+            where: { id: participantId },
+            data: {
+                approval_status: client_1.ApprovalStatus.APPROVED,
+            },
+        });
+        // Create notification
+        yield tx.notification.create({
+            data: {
+                user_id: participant.user.id,
+                message: `Your participation in '${participant.event.title}' has been approved`,
+                type: 'PARTICIPANT_APPROVED',
+                related_event_id: participant.event.id,
+            },
+        });
+        return updatedParticipant;
+    }));
     if (!result) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Participant not found');
     }
@@ -43,6 +69,19 @@ const ApproveParticipant = (participantId, user) => __awaiter(void 0, void 0, vo
 const RejectParticipant = (participantId, user) => __awaiter(void 0, void 0, void 0, function* () {
     const participant = yield prisma_1.default.participant.findUnique({
         where: { id: participantId },
+        include: {
+            event: {
+                select: {
+                    id: true,
+                    title: true,
+                },
+            },
+            user: {
+                select: {
+                    id: true,
+                },
+            },
+        },
     });
     if (!participant) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Participant not found');
@@ -50,10 +89,23 @@ const RejectParticipant = (participantId, user) => __awaiter(void 0, void 0, voi
     if (user.role !== client_1.Role.ADMIN && participant.user_id !== user.id) {
         throw new AppError_1.default(http_status_1.default.FORBIDDEN, 'You are not allowed to reject this participant');
     }
-    const result = yield prisma_1.default.participant.update({
-        where: { id: participantId },
-        data: { approval_status: client_1.ApprovalStatus.REJECTED },
-    });
+    const result = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        // Update participant status
+        const updatedParticipant = yield tx.participant.update({
+            where: { id: participantId },
+            data: { approval_status: client_1.ApprovalStatus.REJECTED },
+        });
+        // Create notification
+        yield tx.notification.create({
+            data: {
+                user_id: participant.user.id,
+                message: `Your participation in '${participant.event.title}' has been rejected`,
+                type: 'PARTICIPANT_REJECTED',
+                related_event_id: participant.event.id,
+            },
+        });
+        return updatedParticipant;
+    }));
     if (!result) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Participant not found');
     }

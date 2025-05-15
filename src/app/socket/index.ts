@@ -85,3 +85,29 @@ export const sendInvitationStatusNotification = (
     console.log(`Status notification sent to user ${senderId}`);
   }
 };
+
+// Function to send participant status notification
+export const sendParticipantStatusNotification = (
+  io: SocketIOServer,
+  userId: string,
+  data: {
+    type: 'PARTICIPANT_APPROVED' | 'PARTICIPANT_REJECTED';
+    message: string;
+    eventId: string;
+    eventTitle: string;
+  },
+) => {
+  const userSocketId = onlineUsers.get(userId);
+
+  NotificationService.CreateNotification({
+    user_id: userId,
+    message: data.message,
+    type: data.type,
+    related_event_id: data.eventId,
+  });
+
+  if (userSocketId) {
+    io.to(userSocketId).emit('notification', data);
+    console.log(`Participant status notification sent to user ${userId}`);
+  }
+};

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendInvitationStatusNotification = exports.sendInvitationNotification = exports.initializeSocketIO = void 0;
+exports.sendParticipantStatusNotification = exports.sendInvitationStatusNotification = exports.sendInvitationNotification = exports.initializeSocketIO = void 0;
 const notification_services_1 = __importDefault(require("../modules/notification/notification.services"));
 // Map to store online users - userId -> socketId
 const onlineUsers = new Map();
@@ -61,3 +61,18 @@ const sendInvitationStatusNotification = (io, senderId, data) => {
     }
 };
 exports.sendInvitationStatusNotification = sendInvitationStatusNotification;
+// Function to send participant status notification
+const sendParticipantStatusNotification = (io, userId, data) => {
+    const userSocketId = onlineUsers.get(userId);
+    notification_services_1.default.CreateNotification({
+        user_id: userId,
+        message: data.message,
+        type: data.type,
+        related_event_id: data.eventId,
+    });
+    if (userSocketId) {
+        io.to(userSocketId).emit('notification', data);
+        console.log(`Participant status notification sent to user ${userId}`);
+    }
+};
+exports.sendParticipantStatusNotification = sendParticipantStatusNotification;
