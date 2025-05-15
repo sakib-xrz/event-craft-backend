@@ -78,9 +78,29 @@ const BanParticipant = (participantId, user) => __awaiter(void 0, void 0, void 0
     }
     return result;
 });
+const GetParticipantByToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
+    const participant = yield prisma_1.default.participant.findUnique({
+        where: { token },
+        include: {
+            event: {
+                select: {
+                    title: true,
+                    is_virtual: true,
+                    date_time: true,
+                    venue: true,
+                },
+            },
+        },
+    });
+    if (!participant) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, 'Participant not found');
+    }
+    return participant;
+});
 const ParticipantService = {
     ApproveParticipant,
     RejectParticipant,
     BanParticipant,
+    GetParticipantByToken,
 };
 exports.default = ParticipantService;

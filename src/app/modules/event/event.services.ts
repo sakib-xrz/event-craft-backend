@@ -16,6 +16,7 @@ import calculatePagination, {
 import EventConstants from './event.constant';
 import { JwtPayload } from 'jsonwebtoken';
 import PaymentUtils from '../payment/payment.utils';
+import ParticipantUtils from '../participant/participant.utils';
 
 interface IGetEventsParams {
   search?: string;
@@ -416,6 +417,7 @@ const JoinEvent = async (eventId: string, user: JwtPayload) => {
         data: {
           event_id: eventId,
           user_id: user.id,
+          token: ParticipantUtils.GenerateToken(),
           payment_status: PaymentStatus.FREE,
           approval_status: ApprovalStatus.APPROVED,
         },
@@ -434,6 +436,7 @@ const JoinEvent = async (eventId: string, user: JwtPayload) => {
         data: {
           event_id: eventId,
           user_id: user.id,
+          token: ParticipantUtils.GenerateToken(),
           payment_status: PaymentStatus.PENDING,
           approval_status: ApprovalStatus.PENDING,
         },
@@ -452,6 +455,7 @@ const JoinEvent = async (eventId: string, user: JwtPayload) => {
         data: {
           event_id: eventId,
           user_id: user.id,
+          token: ParticipantUtils.GenerateToken(),
           payment_status: PaymentStatus.PENDING,
           approval_status: ApprovalStatus.PENDING,
         },
@@ -462,6 +466,7 @@ const JoinEvent = async (eventId: string, user: JwtPayload) => {
         data: {
           event_id: eventId,
           user_id: user.id,
+          token: ParticipantUtils.GenerateToken(),
           payment_status: PaymentStatus.FREE,
           approval_status: ApprovalStatus.PENDING,
         },

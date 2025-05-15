@@ -30,6 +30,7 @@ const client_1 = require("@prisma/client");
 const pagination_1 = __importDefault(require("../../utils/pagination"));
 const event_constant_1 = __importDefault(require("./event.constant"));
 const payment_utils_1 = __importDefault(require("../payment/payment.utils"));
+const participant_utils_1 = __importDefault(require("../participant/participant.utils"));
 const CreateEvent = (payload, user) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield prisma_1.default.event.create({
         data: Object.assign(Object.assign({}, payload), { date_time: new Date(payload.date_time), organizer_id: user.id }),
@@ -322,6 +323,7 @@ const JoinEvent = (eventId, user) => __awaiter(void 0, void 0, void 0, function*
                 data: {
                     event_id: eventId,
                     user_id: user.id,
+                    token: participant_utils_1.default.GenerateToken(),
                     payment_status: client_1.PaymentStatus.FREE,
                     approval_status: client_1.ApprovalStatus.APPROVED,
                 },
@@ -341,6 +343,7 @@ const JoinEvent = (eventId, user) => __awaiter(void 0, void 0, void 0, function*
                 data: {
                     event_id: eventId,
                     user_id: user.id,
+                    token: participant_utils_1.default.GenerateToken(),
                     payment_status: client_1.PaymentStatus.PENDING,
                     approval_status: client_1.ApprovalStatus.PENDING,
                 },
@@ -360,6 +363,7 @@ const JoinEvent = (eventId, user) => __awaiter(void 0, void 0, void 0, function*
                 data: {
                     event_id: eventId,
                     user_id: user.id,
+                    token: participant_utils_1.default.GenerateToken(),
                     payment_status: client_1.PaymentStatus.PENDING,
                     approval_status: client_1.ApprovalStatus.PENDING,
                 },
@@ -371,6 +375,7 @@ const JoinEvent = (eventId, user) => __awaiter(void 0, void 0, void 0, function*
                 data: {
                     event_id: eventId,
                     user_id: user.id,
+                    token: participant_utils_1.default.GenerateToken(),
                     payment_status: client_1.PaymentStatus.FREE,
                     approval_status: client_1.ApprovalStatus.PENDING,
                 },

@@ -94,10 +94,33 @@ const BanParticipant = async (participantId: string, user: JwtPayload) => {
   return result;
 };
 
+const GetParticipantByToken = async (token: string) => {
+  const participant = await prisma.participant.findUnique({
+    where: { token },
+    include: {
+      event: {
+        select: {
+          title: true,
+          is_virtual: true,
+          date_time: true,
+          venue: true,
+        },
+      },
+    },
+  });
+
+  if (!participant) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Participant not found');
+  }
+
+  return participant;
+};
+
 const ParticipantService = {
   ApproveParticipant,
   RejectParticipant,
   BanParticipant,
+  GetParticipantByToken,
 };
 
 export default ParticipantService;

@@ -19,6 +19,7 @@ const AppError_1 = __importDefault(require("../../errors/AppError"));
 const client_1 = require("@prisma/client");
 const payment_utils_1 = __importDefault(require("../payment/payment.utils"));
 const socket_1 = require("../../socket");
+const participant_utils_1 = __importDefault(require("../participant/participant.utils"));
 // Add a reference to the io instance
 let io = null;
 // Add this function to set the io instance
@@ -125,6 +126,7 @@ const AcceptInvitation = (invitationId) => __awaiter(void 0, void 0, void 0, fun
             data: {
                 event_id: invitation.event_id,
                 user_id: invitation.receiver_id,
+                token: participant_utils_1.default.GenerateToken(),
                 payment_status: invitation.is_paid_event
                     ? client_1.PaymentStatus.PENDING
                     : client_1.PaymentStatus.FREE,

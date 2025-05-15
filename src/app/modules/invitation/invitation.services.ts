@@ -13,6 +13,7 @@ import {
   sendInvitationNotification,
   sendInvitationStatusNotification,
 } from '../../socket';
+import ParticipantUtils from '../participant/participant.utils';
 
 // Add a reference to the io instance
 let io: SocketIOServer | null = null;
@@ -143,6 +144,7 @@ const AcceptInvitation = async (invitationId: string) => {
       data: {
         event_id: invitation.event_id,
         user_id: invitation.receiver_id,
+        token: ParticipantUtils.GenerateToken(),
         payment_status: invitation.is_paid_event
           ? PaymentStatus.PENDING
           : PaymentStatus.FREE,

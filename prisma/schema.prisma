@@ -90,6 +90,7 @@ model Event {
 
 model Participant {
   id              String         @id @default(uuid())
+  token           String         @unique
   event_id        String
   user_id         String
   payment_status  PaymentStatus
@@ -101,6 +102,7 @@ model Participant {
   user  User  @relation(fields: [user_id], references: [id])
 
   @@unique([event_id, user_id])
+  @@index([token])
   @@index([event_id])
   @@index([user_id])
   @@map("participants")

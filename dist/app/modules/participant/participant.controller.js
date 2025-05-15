@@ -49,9 +49,20 @@ const BanParticipant = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
         data: result,
     });
 }));
+const GetParticipantByToken = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = req.params.token;
+    const result = yield participant_services_1.default.GetParticipantByToken(token);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Participant fetched successfully',
+        data: result,
+    });
+}));
 const ParticipantController = {
     ApproveParticipant,
     RejectParticipant,
     BanParticipant,
+    GetParticipantByToken,
 };
 exports.default = ParticipantController;

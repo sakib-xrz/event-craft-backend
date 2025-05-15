@@ -5,6 +5,12 @@ import ParticipantController from './participant.controller';
 
 const router = express.Router();
 
+router.get(
+  '/:token',
+  auth(Role.ADMIN, Role.USER),
+  ParticipantController.GetParticipantByToken,
+);
+
 router.patch(
   '/:id/approve',
   auth(Role.ADMIN, Role.USER),

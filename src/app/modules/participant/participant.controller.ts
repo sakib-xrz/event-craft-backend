@@ -46,10 +46,24 @@ const BanParticipant = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const GetParticipantByToken = catchAsync(
+  async (req: Request, res: Response) => {
+    const token = req.params.token;
+    const result = await ParticipantService.GetParticipantByToken(token);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Participant fetched successfully',
+      data: result,
+    });
+  },
+);
+
 const ParticipantController = {
   ApproveParticipant,
   RejectParticipant,
   BanParticipant,
+  GetParticipantByToken,
 };
 
 export default ParticipantController;
