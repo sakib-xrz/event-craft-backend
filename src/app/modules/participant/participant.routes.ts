@@ -6,7 +6,7 @@ import ParticipantController from './participant.controller';
 const router = express.Router();
 
 router.get(
-  '/:token',
+  '/token/:token',
   auth(Role.ADMIN, Role.USER),
   ParticipantController.GetParticipantByToken,
 );

@@ -9,7 +9,7 @@ const auth_1 = __importDefault(require("../../middlewares/auth"));
 const client_1 = require("@prisma/client");
 const participant_controller_1 = __importDefault(require("./participant.controller"));
 const router = express_1.default.Router();
-router.get('/:token', (0, auth_1.default)(client_1.Role.ADMIN, client_1.Role.USER), participant_controller_1.default.GetParticipantByToken);
+router.get('/token/:token', (0, auth_1.default)(client_1.Role.ADMIN, client_1.Role.USER), participant_controller_1.default.GetParticipantByToken);
 router.patch('/:id/approve', (0, auth_1.default)(client_1.Role.ADMIN, client_1.Role.USER), participant_controller_1.default.ApproveParticipant);
 router.patch('/:id/reject', (0, auth_1.default)(client_1.Role.ADMIN, client_1.Role.USER), participant_controller_1.default.RejectParticipant);
 router.patch('/:id/ban', (0, auth_1.default)(client_1.Role.ADMIN, client_1.Role.USER), participant_controller_1.default.BanParticipant);
