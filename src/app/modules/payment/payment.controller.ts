@@ -3,6 +3,19 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import PaymentService from './payment.services';
 
+const GetPaymentDetails = catchAsync(async (req, res) => {
+  const { paymentId } = req.query;
+
+  const result = await PaymentService.GetPaymentDetails(paymentId as string);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Payment details fetched successfully',
+    data: result,
+  });
+});
+
 const CreatePaymentIntent = catchAsync(async (req, res) => {
   const { participant_id } = req.body;
 
@@ -25,6 +38,7 @@ const VerifyPayment = catchAsync(async (req, res) => {
 });
 
 const PaymentController = {
+  GetPaymentDetails,
   CreatePaymentIntent,
   VerifyPayment,
 };

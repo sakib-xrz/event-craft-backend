@@ -91,7 +91,6 @@ const CreatePaymentIntent = (participantId) => __awaiter(void 0, void 0, void 0,
     try {
         const sslcz = new sslcommerz_lts_1.default(store_id, store_passwd, is_live);
         const sslResponse = yield sslcz.init(data);
-        console.log('SSL Response:', sslResponse);
         return sslResponse.GatewayPageURL;
     }
     catch (error) {
@@ -131,6 +130,7 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
         },
         select: {
             id: true,
+            token: true,
         },
     });
     if (!participant) {
@@ -188,6 +188,14 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
             paid_at: new Date(),
         },
     });
+    yield prisma_1.default.participant.update({
+        where: {
+            id: participant.id,
+        },
+        data: {
+            payment_status: client_1.PaymentStatus.PAID,
+        },
+    });
     const invitation = yield prisma_1.default.invitation.findUnique({
         where: {
             event_id_receiver_id: {
@@ -207,10 +215,10 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
         });
     }
     if (payment.event.is_public) {
-        return `${config_1.default.frontend_base_url}/${config_1.default.payment.success_url}?tran_id=${payment.transaction_id}`;
+        return `${config_1.default.frontend_base_url}/${config_1.default.payment.success_url}?pay_id=${payment.id}&token=${participant.token}`;
     }
     else {
-        return `${config_1.default.frontend_base_url}/${config_1.default.payment.success_pending_approval_url}?tran_id=${payment.transaction_id}`;
+        return `${config_1.default.frontend_base_url}/${config_1.default.payment.success_pending_approval_url}?pay_id=${payment.id}`;
     }
 });
 const GetPaymentDetails = (paymentId) => __awaiter(void 0, void 0, void 0, function* () {

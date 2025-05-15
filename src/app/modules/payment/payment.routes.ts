@@ -5,6 +5,12 @@ import PaymentController from './payment.controller';
 
 const router = express.Router();
 
+router.get(
+  '/details/:paymentId',
+  auth(Role.USER),
+  PaymentController.GetPaymentDetails,
+);
+
 router.post('/intent', auth(Role.USER), PaymentController.CreatePaymentIntent);
 
 router.post('/ipn_listener', PaymentController.VerifyPayment);

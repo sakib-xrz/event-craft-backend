@@ -9,6 +9,7 @@ const auth_1 = __importDefault(require("../../middlewares/auth"));
 const client_1 = require("@prisma/client");
 const payment_controller_1 = __importDefault(require("./payment.controller"));
 const router = express_1.default.Router();
+router.get('/details/:paymentId', (0, auth_1.default)(client_1.Role.USER), payment_controller_1.default.GetPaymentDetails);
 router.post('/intent', (0, auth_1.default)(client_1.Role.USER), payment_controller_1.default.CreatePaymentIntent);
 router.post('/ipn_listener', payment_controller_1.default.VerifyPayment);
 exports.PaymentRoutes = router;

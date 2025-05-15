@@ -86,8 +86,6 @@ const CreatePaymentIntent = async (participantId: string) => {
     const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
     const sslResponse = await sslcz.init(data);
 
-    console.log('SSL Response:', sslResponse);
-
     return sslResponse.GatewayPageURL;
   } catch (error) {
     console.error('SSL Payment Error:', error);
@@ -132,6 +130,7 @@ const VerifyPayment = async (payload) => {
     },
     select: {
       id: true,
+      token: true,
     },
   });
 
@@ -202,6 +201,15 @@ const VerifyPayment = async (payload) => {
     },
   });
 
+  await prisma.participant.update({
+    where: {
+      id: participant.id,
+    },
+    data: {
+      payment_status: PaymentStatus.PAID,
+    },
+  });
+
   const invitation = await prisma.invitation.findUnique({
     where: {
       event_id_receiver_id: {
@@ -223,9 +231,9 @@ const VerifyPayment = async (payload) => {
   }
 
   if (payment.event.is_public) {
-    return `${config.frontend_base_url}/${config.payment.success_url}?tran_id=${payment.transaction_id}`;
+    return `${config.frontend_base_url}/${config.payment.success_url}?pay_id=${payment.id}&token=${participant.token}`;
   } else {
-    return `${config.frontend_base_url}/${config.payment.success_pending_approval_url}?tran_id=${payment.transaction_id}`;
+    return `${config.frontend_base_url}/${config.payment.success_pending_approval_url}?pay_id=${payment.id}`;
   }
 };
 
