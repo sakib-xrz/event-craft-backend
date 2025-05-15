@@ -160,7 +160,7 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
                     status: client_1.PaymentStatus.CANCELLED,
                 },
             });
-            return `${config_1.default.frontend_base_url}/${config_1.default.payment.cancel_url}?participant_id=${participant.id}`;
+            return `${config_1.default.frontend_base_url}/${config_1.default.payment.cancel_url}?participant_id=${participant.id}&payment_id=${payment.id}`;
         }
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Invalid IPN request');
     }
@@ -213,8 +213,34 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
         return `${config_1.default.frontend_base_url}/${config_1.default.payment.success_pending_approval_url}?tran_id=${payment.transaction_id}`;
     }
 });
+const GetPaymentDetails = (paymentId) => __awaiter(void 0, void 0, void 0, function* () {
+    const payment = yield prisma_1.default.payment.findUnique({
+        where: {
+            id: paymentId,
+        },
+        select: {
+            amount: true,
+            status: true,
+            paid_at: true,
+            transaction_id: true,
+            event: {
+                select: {
+                    title: true,
+                    is_virtual: true,
+                    date_time: true,
+                    venue: true,
+                },
+            },
+        },
+    });
+    if (!payment) {
+        throw new Error('Payment not found');
+    }
+    return payment;
+});
 const PaymentService = {
     CreatePaymentIntent,
     VerifyPayment,
+    GetPaymentDetails,
 };
 exports.default = PaymentService;

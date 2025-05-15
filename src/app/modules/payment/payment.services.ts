@@ -167,7 +167,7 @@ const VerifyPayment = async (payload) => {
         },
       });
 
-      return `${config.frontend_base_url}/${config.payment.cancel_url}?participant_id=${participant.id}`;
+      return `${config.frontend_base_url}/${config.payment.cancel_url}?participant_id=${participant.id}&payment_id=${payment.id}`;
     }
 
     throw new AppError(httpStatus.BAD_REQUEST, 'Invalid IPN request');
@@ -229,8 +229,37 @@ const VerifyPayment = async (payload) => {
   }
 };
 
+const GetPaymentDetails = async (paymentId: string) => {
+  const payment = await prisma.payment.findUnique({
+    where: {
+      id: paymentId,
+    },
+    select: {
+      amount: true,
+      status: true,
+      paid_at: true,
+      transaction_id: true,
+      event: {
+        select: {
+          title: true,
+          is_virtual: true,
+          date_time: true,
+          venue: true,
+        },
+      },
+    },
+  });
+
+  if (!payment) {
+    throw new Error('Payment not found');
+  }
+
+  return payment;
+};
+
 const PaymentService = {
   CreatePaymentIntent,
   VerifyPayment,
+  GetPaymentDetails,
 };
 export default PaymentService;
