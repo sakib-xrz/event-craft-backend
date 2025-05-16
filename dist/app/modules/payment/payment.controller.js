@@ -17,7 +17,7 @@ const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const payment_services_1 = __importDefault(require("./payment.services"));
 const GetPaymentDetails = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { paymentId } = req.query;
+    const { paymentId } = req.params;
     const result = yield payment_services_1.default.GetPaymentDetails(paymentId);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,

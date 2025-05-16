@@ -149,7 +149,7 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
                     status: client_1.PaymentStatus.FAILED,
                 },
             });
-            return `${config_1.default.frontend_base_url}/${config_1.default.payment.fail_url}?participant_id=${participant.id}`;
+            return `${config_1.default.frontend_base_url}/${config_1.default.payment.fail_url}?participant_id=${participant.id}&pay_id=${payment.id}`;
         }
         if (payload.status === 'CANCELLED') {
             yield prisma_1.default.payment.update({
@@ -160,7 +160,7 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
                     status: client_1.PaymentStatus.CANCELLED,
                 },
             });
-            return `${config_1.default.frontend_base_url}/${config_1.default.payment.cancel_url}?participant_id=${participant.id}&payment_id=${payment.id}`;
+            return `${config_1.default.frontend_base_url}/${config_1.default.payment.cancel_url}?participant_id=${participant.id}&pay_id=${payment.id}`;
         }
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Invalid IPN request');
     }
@@ -222,6 +222,7 @@ const VerifyPayment = (payload) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 const GetPaymentDetails = (paymentId) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('paymentId', paymentId);
     const payment = yield prisma_1.default.payment.findUnique({
         where: {
             id: paymentId,
@@ -233,6 +234,7 @@ const GetPaymentDetails = (paymentId) => __awaiter(void 0, void 0, void 0, funct
             transaction_id: true,
             event: {
                 select: {
+                    id: true,
                     title: true,
                     is_virtual: true,
                     date_time: true,
