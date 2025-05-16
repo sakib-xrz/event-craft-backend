@@ -153,7 +153,7 @@ const VerifyPayment = async (payload) => {
         },
       });
 
-      return `${config.frontend_base_url}/${config.payment.fail_url}?participant_id=${participant.id}`;
+      return `${config.frontend_base_url}/${config.payment.fail_url}?participant_id=${participant.id}&pay_id=${payment.id}`;
     }
 
     if (payload.status === 'CANCELLED') {
@@ -166,7 +166,7 @@ const VerifyPayment = async (payload) => {
         },
       });
 
-      return `${config.frontend_base_url}/${config.payment.cancel_url}?participant_id=${participant.id}&payment_id=${payment.id}`;
+      return `${config.frontend_base_url}/${config.payment.cancel_url}?participant_id=${participant.id}&pay_id=${payment.id}`;
     }
 
     throw new AppError(httpStatus.BAD_REQUEST, 'Invalid IPN request');
@@ -238,6 +238,8 @@ const VerifyPayment = async (payload) => {
 };
 
 const GetPaymentDetails = async (paymentId: string) => {
+  console.log('paymentId', paymentId);
+
   const payment = await prisma.payment.findUnique({
     where: {
       id: paymentId,
@@ -249,6 +251,7 @@ const GetPaymentDetails = async (paymentId: string) => {
       transaction_id: true,
       event: {
         select: {
+          id: true,
           title: true,
           is_virtual: true,
           date_time: true,

@@ -4,9 +4,9 @@ import sendResponse from '../../utils/sendResponse';
 import PaymentService from './payment.services';
 
 const GetPaymentDetails = catchAsync(async (req, res) => {
-  const { paymentId } = req.query;
+  const { paymentId } = req.params;
 
-  const result = await PaymentService.GetPaymentDetails(paymentId as string);
+  const result = await PaymentService.GetPaymentDetails(paymentId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
