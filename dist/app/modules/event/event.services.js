@@ -536,14 +536,6 @@ const GetRequestedEvents = (user, filters, options) => __awaiter(void 0, void 0,
     const { page, limit, skip } = (0, pagination_1.default)(options);
     const { search, status } = filters;
     const andConditions = [];
-    // Base conditions for requested events
-    const participantConditions = {
-        user_id: user.id,
-        is_banned: false,
-        approval_status: {
-            in: [client_1.ApprovalStatus.PENDING, client_1.ApprovalStatus.REJECTED],
-        },
-    };
     // Add search condition if provided
     if (search) {
         andConditions.push({
@@ -563,11 +555,33 @@ const GetRequestedEvents = (user, filters, options) => __awaiter(void 0, void 0,
     andConditions.push({
         is_deleted: false,
     });
-    const whereConditions = andConditions.length > 0 ? { AND: andConditions } : {};
-    const result = yield prisma_1.default.participant.findMany({
-        where: Object.assign(Object.assign({}, participantConditions), { event: whereConditions }),
+    // Add condition for events that the user has requested to join
+    andConditions.push({
+        participants: {
+            some: {
+                user_id: user.id,
+                is_banned: false,
+                approval_status: {
+                    in: [client_1.ApprovalStatus.PENDING, client_1.ApprovalStatus.REJECTED],
+                },
+            },
+        },
+    });
+    const whereConditions = {
+        AND: andConditions,
+    };
+    const result = yield prisma_1.default.event.findMany({
+        where: whereConditions,
         include: {
-            event: true,
+            participants: {
+                where: {
+                    user_id: user.id,
+                    is_banned: false,
+                    approval_status: {
+                        in: [client_1.ApprovalStatus.PENDING, client_1.ApprovalStatus.REJECTED],
+                    },
+                },
+            },
         },
         skip,
         take: limit,
@@ -576,11 +590,11 @@ const GetRequestedEvents = (user, filters, options) => __awaiter(void 0, void 0,
                 [options.sort_by]: options.sort_order,
             }
             : {
-                event: { created_at: 'desc' },
+                created_at: 'desc',
             },
     });
-    const total = yield prisma_1.default.participant.count({
-        where: Object.assign(Object.assign({}, participantConditions), { event: whereConditions }),
+    const total = yield prisma_1.default.event.count({
+        where: whereConditions,
     });
     return {
         meta: {

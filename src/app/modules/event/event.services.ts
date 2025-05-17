@@ -679,15 +679,6 @@ const GetRequestedEvents = async (
 
   const andConditions: Prisma.EventWhereInput[] = [];
 
-  // Base conditions for requested events
-  const participantConditions: Prisma.ParticipantWhereInput = {
-    user_id: user.id,
-    is_banned: false,
-    approval_status: {
-      in: [ApprovalStatus.PENDING, ApprovalStatus.REJECTED],
-    },
-  };
-
   // Add search condition if provided
   if (search) {
     andConditions.push({
@@ -710,16 +701,35 @@ const GetRequestedEvents = async (
     is_deleted: false,
   });
 
-  const whereConditions: Prisma.EventWhereInput =
-    andConditions.length > 0 ? { AND: andConditions } : {};
-
-  const result = await prisma.participant.findMany({
-    where: {
-      ...participantConditions,
-      event: whereConditions,
+  // Add condition for events that the user has requested to join
+  andConditions.push({
+    participants: {
+      some: {
+        user_id: user.id,
+        is_banned: false,
+        approval_status: {
+          in: [ApprovalStatus.PENDING, ApprovalStatus.REJECTED],
+        },
+      },
     },
+  });
+
+  const whereConditions: Prisma.EventWhereInput = {
+    AND: andConditions,
+  };
+
+  const result = await prisma.event.findMany({
+    where: whereConditions,
     include: {
-      event: true,
+      participants: {
+        where: {
+          user_id: user.id,
+          is_banned: false,
+          approval_status: {
+            in: [ApprovalStatus.PENDING, ApprovalStatus.REJECTED],
+          },
+        },
+      },
     },
     skip,
     take: limit,
@@ -729,15 +739,12 @@ const GetRequestedEvents = async (
             [options.sort_by]: options.sort_order,
           }
         : {
-            event: { created_at: 'desc' },
+            created_at: 'desc',
           },
   });
 
-  const total = await prisma.participant.count({
-    where: {
-      ...participantConditions,
-      event: whereConditions,
-    },
+  const total = await prisma.event.count({
+    where: whereConditions,
   });
 
   return {
