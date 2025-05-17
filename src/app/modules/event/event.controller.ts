@@ -161,6 +161,38 @@ const GetReviews = catchAsync(async (req, res) => {
   });
 });
 
+const GetJoinedEvents = catchAsync(async (req, res) => {
+  const user = req.user;
+  const filters = pick(req.query, EventConstants.FilterableFields);
+  const options = pick(req.query, ['limit', 'page', 'sort_by', 'sort_order']);
+
+  const result = await EventService.GetJoinedEvents(user, filters, options);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Joined events retrieved successfully',
+    data: result.data,
+    meta: result.meta,
+  });
+});
+
+const GetRequestedEvents = catchAsync(async (req, res) => {
+  const user = req.user;
+  const filters = pick(req.query, EventConstants.FilterableFields);
+  const options = pick(req.query, ['limit', 'page', 'sort_by', 'sort_order']);
+
+  const result = await EventService.GetRequestedEvents(user, filters, options);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Requested events retrieved successfully',
+    data: result.data,
+    meta: result.meta,
+  });
+});
+
 const EventController = {
   CreateEvent,
   CreateEvents,
@@ -174,6 +206,8 @@ const EventController = {
   GetParticipants,
   SubmitReview,
   GetReviews,
+  GetJoinedEvents,
+  GetRequestedEvents,
 };
 
 export default EventController;

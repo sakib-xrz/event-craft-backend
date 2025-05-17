@@ -15,6 +15,10 @@ router
     .get(event_controller_1.default.GetEvents);
 router.post('/bulk', (0, auth_1.default)(client_1.Role.USER, client_1.Role.ADMIN), event_controller_1.default.CreateEvents);
 router.route('/featured').get(event_controller_1.default.GetFeaturedEvent);
+router.route('/joined').get((0, auth_1.default)(client_1.Role.USER), event_controller_1.default.GetJoinedEvents);
+router
+    .route('/requested')
+    .get((0, auth_1.default)(client_1.Role.USER), event_controller_1.default.GetRequestedEvents);
 router
     .route('/:id')
     .get(event_controller_1.default.GetEvent)

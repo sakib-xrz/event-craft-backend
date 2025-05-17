@@ -20,6 +20,7 @@ import ParticipantUtils from '../participant/participant.utils';
 
 interface IGetEventsParams {
   search?: string;
+  status?: EventStatus;
 }
 
 const CreateEvent = async (payload: Event, user: JwtPayload) => {
@@ -584,6 +585,171 @@ const GetReviews = async (eventId: string) => {
   return reviews;
 };
 
+const GetJoinedEvents = async (
+  user: JwtPayload,
+  filters: IGetEventsParams,
+  options: IPaginationOptions,
+) => {
+  const { page, limit, skip } = calculatePagination(options);
+  const { search, status } = filters;
+
+  const andConditions: Prisma.EventWhereInput[] = [];
+
+  // Add search condition if provided
+  if (search) {
+    andConditions.push({
+      title: {
+        contains: search,
+        mode: 'insensitive',
+      },
+    });
+  }
+
+  // Add status filter if provided
+  if (status) {
+    andConditions.push({
+      status,
+    });
+  }
+
+  // Add not deleted condition
+  andConditions.push({
+    is_deleted: false,
+  });
+
+  // Add condition for events that the user has joined
+  andConditions.push({
+    participants: {
+      some: {
+        user_id: user.id,
+        is_banned: false,
+        approval_status: ApprovalStatus.APPROVED,
+      },
+    },
+  });
+
+  const whereConditions: Prisma.EventWhereInput = {
+    AND: andConditions,
+  };
+
+  const result = await prisma.event.findMany({
+    where: whereConditions,
+    include: {
+      participants: {
+        where: {
+          user_id: user.id,
+          is_banned: false,
+          approval_status: ApprovalStatus.APPROVED,
+        },
+      },
+    },
+    skip,
+    take: limit,
+    orderBy:
+      options.sort_by && options.sort_order
+        ? {
+            [options.sort_by]: options.sort_order,
+          }
+        : {
+            created_at: 'desc',
+          },
+  });
+
+  const total = await prisma.event.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
+const GetRequestedEvents = async (
+  user: JwtPayload,
+  filters: IGetEventsParams,
+  options: IPaginationOptions,
+) => {
+  const { page, limit, skip } = calculatePagination(options);
+  const { search, status } = filters;
+
+  const andConditions: Prisma.EventWhereInput[] = [];
+
+  // Base conditions for requested events
+  const participantConditions: Prisma.ParticipantWhereInput = {
+    user_id: user.id,
+    is_banned: false,
+    approval_status: {
+      in: [ApprovalStatus.PENDING, ApprovalStatus.REJECTED],
+    },
+  };
+
+  // Add search condition if provided
+  if (search) {
+    andConditions.push({
+      title: {
+        contains: search,
+        mode: 'insensitive',
+      },
+    });
+  }
+
+  // Add status filter if provided
+  if (status) {
+    andConditions.push({
+      status,
+    });
+  }
+
+  // Add not deleted condition
+  andConditions.push({
+    is_deleted: false,
+  });
+
+  const whereConditions: Prisma.EventWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const result = await prisma.participant.findMany({
+    where: {
+      ...participantConditions,
+      event: whereConditions,
+    },
+    include: {
+      event: true,
+    },
+    skip,
+    take: limit,
+    orderBy:
+      options.sort_by && options.sort_order
+        ? {
+            [options.sort_by]: options.sort_order,
+          }
+        : {
+            event: { created_at: 'desc' },
+          },
+  });
+
+  const total = await prisma.participant.count({
+    where: {
+      ...participantConditions,
+      event: whereConditions,
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
 const EventService = {
   CreateEvent,
   CreateEvents,
@@ -597,6 +763,8 @@ const EventService = {
   GetParticipants,
   SubmitReview,
   GetReviews,
+  GetJoinedEvents,
+  GetRequestedEvents,
 };
 
 export default EventService;

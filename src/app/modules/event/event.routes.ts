@@ -14,6 +14,12 @@ router.post('/bulk', auth(Role.USER, Role.ADMIN), EventController.CreateEvents);
 
 router.route('/featured').get(EventController.GetFeaturedEvent);
 
+router.route('/joined').get(auth(Role.USER), EventController.GetJoinedEvents);
+
+router
+  .route('/requested')
+  .get(auth(Role.USER), EventController.GetRequestedEvents);
+
 router
   .route('/:id')
   .get(EventController.GetEvent)

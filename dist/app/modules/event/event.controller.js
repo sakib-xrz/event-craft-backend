@@ -148,6 +148,32 @@ const GetReviews = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
         data: result,
     });
 }));
+const GetJoinedEvents = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = req.user;
+    const filters = (0, pick_1.default)(req.query, event_constant_1.default.FilterableFields);
+    const options = (0, pick_1.default)(req.query, ['limit', 'page', 'sort_by', 'sort_order']);
+    const result = yield event_services_1.default.GetJoinedEvents(user, filters, options);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Joined events retrieved successfully',
+        data: result.data,
+        meta: result.meta,
+    });
+}));
+const GetRequestedEvents = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = req.user;
+    const filters = (0, pick_1.default)(req.query, event_constant_1.default.FilterableFields);
+    const options = (0, pick_1.default)(req.query, ['limit', 'page', 'sort_by', 'sort_order']);
+    const result = yield event_services_1.default.GetRequestedEvents(user, filters, options);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Requested events retrieved successfully',
+        data: result.data,
+        meta: result.meta,
+    });
+}));
 const EventController = {
     CreateEvent,
     CreateEvents,
@@ -161,5 +187,7 @@ const EventController = {
     GetParticipants,
     SubmitReview,
     GetReviews,
+    GetJoinedEvents,
+    GetRequestedEvents,
 };
 exports.default = EventController;

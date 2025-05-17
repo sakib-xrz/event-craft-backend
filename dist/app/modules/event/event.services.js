@@ -463,6 +463,134 @@ const GetReviews = (eventId) => __awaiter(void 0, void 0, void 0, function* () {
     });
     return reviews;
 });
+const GetJoinedEvents = (user, filters, options) => __awaiter(void 0, void 0, void 0, function* () {
+    const { page, limit, skip } = (0, pagination_1.default)(options);
+    const { search, status } = filters;
+    const andConditions = [];
+    // Add search condition if provided
+    if (search) {
+        andConditions.push({
+            title: {
+                contains: search,
+                mode: 'insensitive',
+            },
+        });
+    }
+    // Add status filter if provided
+    if (status) {
+        andConditions.push({
+            status,
+        });
+    }
+    // Add not deleted condition
+    andConditions.push({
+        is_deleted: false,
+    });
+    // Add condition for events that the user has joined
+    andConditions.push({
+        participants: {
+            some: {
+                user_id: user.id,
+                is_banned: false,
+                approval_status: client_1.ApprovalStatus.APPROVED,
+            },
+        },
+    });
+    const whereConditions = {
+        AND: andConditions,
+    };
+    const result = yield prisma_1.default.event.findMany({
+        where: whereConditions,
+        include: {
+            participants: {
+                where: {
+                    user_id: user.id,
+                    is_banned: false,
+                    approval_status: client_1.ApprovalStatus.APPROVED,
+                },
+            },
+        },
+        skip,
+        take: limit,
+        orderBy: options.sort_by && options.sort_order
+            ? {
+                [options.sort_by]: options.sort_order,
+            }
+            : {
+                created_at: 'desc',
+            },
+    });
+    const total = yield prisma_1.default.event.count({
+        where: whereConditions,
+    });
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+        },
+        data: result,
+    };
+});
+const GetRequestedEvents = (user, filters, options) => __awaiter(void 0, void 0, void 0, function* () {
+    const { page, limit, skip } = (0, pagination_1.default)(options);
+    const { search, status } = filters;
+    const andConditions = [];
+    // Base conditions for requested events
+    const participantConditions = {
+        user_id: user.id,
+        is_banned: false,
+        approval_status: {
+            in: [client_1.ApprovalStatus.PENDING, client_1.ApprovalStatus.REJECTED],
+        },
+    };
+    // Add search condition if provided
+    if (search) {
+        andConditions.push({
+            title: {
+                contains: search,
+                mode: 'insensitive',
+            },
+        });
+    }
+    // Add status filter if provided
+    if (status) {
+        andConditions.push({
+            status,
+        });
+    }
+    // Add not deleted condition
+    andConditions.push({
+        is_deleted: false,
+    });
+    const whereConditions = andConditions.length > 0 ? { AND: andConditions } : {};
+    const result = yield prisma_1.default.participant.findMany({
+        where: Object.assign(Object.assign({}, participantConditions), { event: whereConditions }),
+        include: {
+            event: true,
+        },
+        skip,
+        take: limit,
+        orderBy: options.sort_by && options.sort_order
+            ? {
+                [options.sort_by]: options.sort_order,
+            }
+            : {
+                event: { created_at: 'desc' },
+            },
+    });
+    const total = yield prisma_1.default.participant.count({
+        where: Object.assign(Object.assign({}, participantConditions), { event: whereConditions }),
+    });
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+        },
+        data: result,
+    };
+});
 const EventService = {
     CreateEvent,
     CreateEvents,
@@ -476,5 +604,7 @@ const EventService = {
     GetParticipants,
     SubmitReview,
     GetReviews,
+    GetJoinedEvents,
+    GetRequestedEvents,
 };
 exports.default = EventService;
