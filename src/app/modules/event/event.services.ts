@@ -637,6 +637,16 @@ const GetJoinedEvents = async (
     where: whereConditions,
     skip,
     take: limit,
+    select: {
+      id: true,
+      title: true,
+      date_time: true,
+      venue: true,
+      is_public: true,
+      is_paid: true,
+      is_virtual: true,
+      status: true,
+    },
     orderBy:
       options.sort_by && options.sort_order
         ? {
