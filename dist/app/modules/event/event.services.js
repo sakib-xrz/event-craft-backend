@@ -525,66 +525,58 @@ const GetJoinedEvents = (user, filters, options) => __awaiter(void 0, void 0, vo
 });
 const GetRequestedEvents = (user, filters, options) => __awaiter(void 0, void 0, void 0, function* () {
     const { page, limit, skip } = (0, pagination_1.default)(options);
-    const { search, status } = filters;
+    const { search, approval_status } = filters;
     const andConditions = [];
-    // Add search condition if provided
-    if (search) {
-        andConditions.push({
-            title: {
-                contains: search,
-                mode: 'insensitive',
-            },
-        });
-    }
-    // Add status filter if provided
-    if (status) {
-        andConditions.push({
-            status,
-        });
-    }
-    // Add not deleted condition
+    // Filter by current user - most selective filter first
     andConditions.push({
-        is_deleted: false,
+        user_id: user.id,
     });
-    // Add condition for events that the user has requested to join
+    // Explicitly list non-approved statuses instead of using "not"
     andConditions.push({
-        participants: {
-            some: {
-                user_id: user.id,
-                is_banned: false,
-                approval_status: {
-                    in: [client_1.ApprovalStatus.PENDING, client_1.ApprovalStatus.REJECTED],
-                },
-            },
+        approval_status: {
+            in: [client_1.ApprovalStatus.PENDING, client_1.ApprovalStatus.REJECTED],
         },
     });
+    // Only include events that aren't deleted
+    andConditions.push({
+        event: Object.assign({ is_deleted: false }, (search ? { title: { contains: search, mode: 'insensitive' } } : {})),
+    });
+    if (approval_status) {
+        andConditions.push({
+            approval_status,
+        });
+    }
     const whereConditions = {
         AND: andConditions,
     };
-    const result = yield prisma_1.default.event.findMany({
+    const result = yield prisma_1.default.participant.findMany({
         where: whereConditions,
-        include: {
-            participants: {
-                where: {
-                    user_id: user.id,
-                    is_banned: false,
-                    approval_status: {
-                        in: [client_1.ApprovalStatus.PENDING, client_1.ApprovalStatus.REJECTED],
-                    },
+        skip,
+        take: limit,
+        orderBy: {
+            event: {
+                date_time: 'asc',
+            },
+        },
+        select: {
+            id: true,
+            approval_status: true,
+            payment_status: true,
+            is_banned: true,
+            event: {
+                select: {
+                    id: true,
+                    title: true,
+                    date_time: true,
+                    venue: true,
+                    is_paid: true,
+                    is_public: true,
+                    is_virtual: true,
                 },
             },
         },
-        skip,
-        take: limit,
-        orderBy: options.sort_by && options.sort_order
-            ? {
-                [options.sort_by]: options.sort_order,
-            }
-            : {
-                created_at: 'desc',
-            },
     });
-    const total = yield prisma_1.default.event.count({
+    const total = yield prisma_1.default.participant.count({
         where: whereConditions,
     });
     return {

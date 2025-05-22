@@ -5,6 +5,7 @@ const FilterableFields = [
   'is_paid',
   'is_virtual',
   'status',
+  'approval_status',
 ];
 
 const SearchableFields = ['title'];
