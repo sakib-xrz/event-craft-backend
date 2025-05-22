@@ -501,15 +501,6 @@ const GetJoinedEvents = (user, filters, options) => __awaiter(void 0, void 0, vo
     };
     const result = yield prisma_1.default.event.findMany({
         where: whereConditions,
-        include: {
-            participants: {
-                where: {
-                    user_id: user.id,
-                    is_banned: false,
-                    approval_status: client_1.ApprovalStatus.APPROVED,
-                },
-            },
-        },
         skip,
         take: limit,
         orderBy: options.sort_by && options.sort_order
@@ -517,7 +508,7 @@ const GetJoinedEvents = (user, filters, options) => __awaiter(void 0, void 0, vo
                 [options.sort_by]: options.sort_order,
             }
             : {
-                created_at: 'desc',
+                date_time: 'asc',
             },
     });
     const total = yield prisma_1.default.event.count({
