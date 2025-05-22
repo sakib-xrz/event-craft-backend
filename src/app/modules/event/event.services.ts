@@ -634,15 +634,6 @@ const GetJoinedEvents = async (
 
   const result = await prisma.event.findMany({
     where: whereConditions,
-    include: {
-      participants: {
-        where: {
-          user_id: user.id,
-          is_banned: false,
-          approval_status: ApprovalStatus.APPROVED,
-        },
-      },
-    },
     skip,
     take: limit,
     orderBy:
@@ -651,7 +642,7 @@ const GetJoinedEvents = async (
             [options.sort_by]: options.sort_order,
           }
         : {
-            created_at: 'desc',
+            date_time: 'asc',
           },
   });
 
